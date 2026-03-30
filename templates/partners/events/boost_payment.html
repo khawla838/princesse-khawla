@@ -1,0 +1,63 @@
+{% extends 'partners/base.html' %}
+{% block title %}Paiement Boost Événement{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex">
+  {% include 'partners/sidebar.html' %}
+
+  <main class="ml-64 flex-1 p-8">
+    <div class="max-w-xl mx-auto">
+
+      <div class="mb-8">
+        <a href="{% url 'partners:event_list' %}" class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1 mb-4">
+          ← Retour aux événements
+        </a>
+        <h1 class="text-2xl font-bold text-gray-900">💳 Paiement</h1>
+        <p class="text-gray-500 mt-1">Finalisez votre boost via Konnect</p>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-6">
+
+        <!-- Résumé -->
+        <div class="bg-purple-50 border border-purple-200 rounded-xl p-5">
+          <h3 class="font-bold text-purple-800 text-lg mb-3">{{ event.title }}</h3>
+          <div class="space-y-2 text-sm text-purple-700">
+            <div class="flex justify-between">
+              <span>Date de l'événement</span>
+              <span>{{ event.start_date|date:"d M Y" }} → {{ event.end_date|date:"d M Y" }}</span>
+            </div>
+            <div class="flex justify-between border-t border-purple-200 pt-2 mt-2">
+              <span class="font-bold">Total</span>
+              <span class="font-bold text-xl text-purple-800">{{ boost_price }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Info Konnect -->
+        <div class="flex items-center gap-3 bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <div class="text-3xl">🔐</div>
+          <div>
+            <p class="text-sm font-semibold text-gray-800">Paiement sécurisé via Konnect</p>
+            <p class="text-xs text-gray-500 mt-0.5">Carte bancaire, Wallet ou e-DINAR acceptés</p>
+          </div>
+        </div>
+
+        <!-- Bouton payer -->
+        <form method="post">
+          {% csrf_token %}
+          <button type="submit"
+            class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl transition shadow-md text-lg">
+            Payer {{ boost_price }} avec Konnect →
+          </button>
+        </form>
+
+        <p class="text-xs text-gray-400 text-center">
+          Vous serez redirigé vers la plateforme de paiement Konnect.<br>
+          Votre boost sera activé automatiquement après confirmation.
+        </p>
+
+      </div>
+    </div>
+  </main>
+</div>
+{% endblock %}

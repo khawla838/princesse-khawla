@@ -135,7 +135,6 @@ def event_boost_payment(request, event_id):
         return redirect('partners:event_list')
 
     if request.method == 'POST':
-        # Prix boost fixe : 20 TND = 20000 millimes
         BOOST_PRICE_MILLIMES = 20000
         order_id    = f"boost-{event.id}"
         base_url    = request.build_absolute_uri('/').rstrip('/')
@@ -153,18 +152,17 @@ def event_boost_payment(request, event_id):
         )
 
         if result.get('payUrl'):
-            # Sauvegarde la ref de paiement sur l'event
-            event.konnect_payment_ref = result['paymentRef']
-            event.save(update_fields=['konnect_payment_ref'] if hasattr(event, 'konnect_payment_ref') else [])
+            event.boost_payment_ref = result['paymentRef']
+            event.save(update_fields=['boost_payment_ref'])
             return redirect(result['payUrl'])
         else:
             messages.error(request, f"Erreur Konnect : {result.get('error', 'Inconnu')}")
             return redirect('partners:event_boost_payment', event_id=event.id)
 
     return render(request, 'partners/events/boost_payment.html', {
-        'partner':      partner,
-        'event':        event,
-        'boost_price':  '20.000 TND',
+        'partner':     partner,
+        'event':       event,
+        'boost_price': '20.000 TND',
     })
 
 
@@ -179,10 +177,12 @@ def event_boost_webhook(request, event_id):
 
             if status == 'completed' and payment_ref:
                 event = PartnerEvent.objects.get(id=event_id)
-                event.is_boosted = True
-                event.boosted_at = timezone.now()
-                event.status     = 'boosted'
-                event.save(update_fields=['is_boosted', 'boosted_at', 'status'])
+                event.is_boosted        = True
+                event.boosted_at        = timezone.now()
+                event.status            = 'boosted'
+                event.boost_payment_ref = payment_ref
+                event.boost_paid_at     = timezone.now()
+                event.save(update_fields=['is_boosted', 'boosted_at', 'status', 'boost_payment_ref', 'boost_paid_at'])
         except Exception:
             pass
     return JsonResponse({'received': True})
@@ -194,15 +194,16 @@ def event_boost_success(request, event_id):
     partner = request.partner
     event   = get_object_or_404(PartnerEvent, id=event_id, partner=partner)
 
-    # Vérifie avec Konnect si paiement réellement complété
     payment_ref = request.GET.get('payment_ref', '')
     if payment_ref:
         result = konnect.verify_payment(payment_ref)
         if result.get('paid'):
-            event.is_boosted = True
-            event.boosted_at = timezone.now()
-            event.status     = 'boosted'
-            event.save(update_fields=['is_boosted', 'boosted_at', 'status'])
+            event.is_boosted        = True
+            event.boosted_at        = timezone.now()
+            event.status            = 'boosted'
+            event.boost_payment_ref = payment_ref
+            event.boost_paid_at     = timezone.now()
+            event.save(update_fields=['is_boosted', 'boosted_at', 'status', 'boost_payment_ref', 'boost_paid_at'])
             messages.success(request, f"Evenement '{event.title}' booste avec succes !")
         else:
             messages.error(request, "Paiement non confirme. Veuillez contacter le support.")
@@ -290,7 +291,6 @@ def ad_payment(request, ad_id):
         return redirect('partners:ad_list')
 
     if request.method == 'POST':
-        # Montant en millimes (1 TND = 1000 millimes)
         amount_millimes = int(float(ad.total_price) * 1000)
         order_id        = f"ad-{ad.id}"
         base_url        = request.build_absolute_uri('/').rstrip('/')
@@ -386,7 +386,6 @@ def subscription(request):
     partner = request.partner
     from partners.pricing import SUBSCRIPTION_PRICES, PERIOD_LABELS, PERIOD_MONTHS
 
-    # Prépare les données pour le template
     periods = {}
     base_price_1month = SUBSCRIPTION_PRICES['1_month']['total']
     for key, prices in SUBSCRIPTION_PRICES.items():
@@ -407,7 +406,6 @@ def subscription(request):
         from partners.pricing import calculate_subscription_price
         price_info = calculate_subscription_price(period, payment_type)
 
-        # Montant en millimes
         amount_millimes = int(float(price_info['first_payment']) * 1000)
         order_id        = f"sub-{partner.id}-{period}"
         base_url        = request.build_absolute_uri('/').rstrip('/')
@@ -425,7 +423,6 @@ def subscription(request):
         )
 
         if result.get('payUrl'):
-            # Sauvegarde les infos en session pour le success
             request.session['sub_period']       = period
             request.session['sub_payment_type'] = payment_type
             request.session['sub_payment_ref']  = result['paymentRef']
@@ -452,10 +449,8 @@ def subscription_webhook(request):
             order_id    = data.get('orderId', '')
 
             if status == 'completed' and order_id.startswith('sub-'):
-                parts   = order_id.split('-')
-                # order_id = sub-{partner_id}-{period}
-                period  = parts[-1] + '_' + parts[-2] if len(parts) >= 3 else parts[-1]
-                # Retrouve le partenaire
+                parts      = order_id.split('-')
+                period     = parts[-1] + '_' + parts[-2] if len(parts) >= 3 else parts[-1]
                 partner_id = '-'.join(parts[1:-2]) if len(parts) > 3 else parts[1]
                 _activate_subscription(partner_id, period, 'total', payment_ref)
         except Exception:
@@ -476,7 +471,6 @@ def subscription_success(request):
         if result.get('paid'):
             _activate_subscription(str(partner.id), period, payment_type, payment_ref)
             messages.success(request, f"Abonnement activé avec succès !")
-            # Nettoie la session
             for k in ['sub_period', 'sub_payment_type', 'sub_payment_ref']:
                 request.session.pop(k, None)
         else:
@@ -498,7 +492,6 @@ def _activate_subscription(partner_id: str, period: str, payment_type: str, paym
         months     = PERIOD_MONTHS.get(period, 1)
         end_date   = today + relativedelta(months=months)
 
-        # Met à jour le partenaire
         partner.contract_period = period
         partner.payment_type    = payment_type
         partner.contract_start  = today
@@ -511,7 +504,6 @@ def _activate_subscription(partner_id: str, period: str, payment_type: str, paym
             'account_frozen', 'is_verified'
         ])
 
-        # Crée un enregistrement contrat
         from partners.models import PartnerContract
         PartnerContract.objects.create(
             partner        = partner,
@@ -589,7 +581,6 @@ def change_email(request):
             messages.error(request, "Les emails ne correspondent pas.")
             return redirect('partners:account')
 
-        # Vérifie que l'email n'est pas déjà pris
         if Partner.objects.filter(email=new_email).exclude(id=partner.id).exists():
             messages.error(request, "Cet email est déjà utilisé par un autre compte.")
             return redirect('partners:account')
@@ -610,7 +601,6 @@ def cancel_email_change(request):
         messages.success(request, "Demande de changement d'email annulée.")
     return redirect('partners:account')
 
-# Ajoute ces vues dans partners/views.py
 
 from django.http import JsonResponse
 from partners.models import Coupon
@@ -624,7 +614,7 @@ def coupon_verify(request):
     Retourne JSON : { valid, discount, error }
     """
     code     = request.GET.get('code', '').strip().upper()
-    category = request.GET.get('category', 'both')  # subscription / content / both
+    category = request.GET.get('category', 'both')
 
     if not code:
         return JsonResponse({'valid': False, 'error': 'Code manquant'})
@@ -637,7 +627,6 @@ def coupon_verify(request):
     if not coupon.is_valid:
         return JsonResponse({'valid': False, 'error': 'Ce coupon est expiré ou désactivé'})
 
-    # Vérifie que le coupon s'applique à la bonne catégorie
     if coupon.category != 'both' and coupon.category != category:
         return JsonResponse({
             'valid': False,
@@ -661,14 +650,12 @@ def toggle_account(request):
 
     if request.method == 'POST':
         if partner.is_temporarily_disabled:
-            # Réactiver
             partner.is_temporarily_disabled = False
             partner.reactivated_at          = timezone.now()
             partner.disabled_reason         = None
             partner.save(update_fields=['is_temporarily_disabled', 'reactivated_at', 'disabled_reason'])
             messages.success(request, "Votre compte a été réactivé.")
         else:
-            # Désactiver
             reason = request.POST.get('reason', 'Désactivation volontaire')
             partner.is_temporarily_disabled = True
             partner.disabled_at             = timezone.now()
