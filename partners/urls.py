@@ -4,10 +4,6 @@ from partners import views
 app_name = 'partners'
 
 urlpatterns = [
-    # Auth
-    path('login/',   views.partner_login,  name='login'),
-    path('logout/',  views.partner_logout, name='logout'),
-
     # Dashboard
     path('dashboard/', views.partner_dashboard, name='dashboard'),
 

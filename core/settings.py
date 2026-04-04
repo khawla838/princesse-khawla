@@ -129,12 +129,9 @@ CITIES_LIGHT_TRANSLATION_LANGUAGES = ["en", "fr", "ar"]
 CITIES_LIGHT_INCLUDE_COUNTRIES = ["TN", "MA", "DZ", "LY", "EG", "LB", "YE", "SY"]
 CITIES_LIGHT_INCLUDE_CITY_TYPES = ["PPL", "PPLA", "PPLA2", "PPLA3", "PPLA4", "PPLC"]
 
-LOGIN_URL = "shared:login"
-LOGIN_REDIRECT_URL = "guard:dashboard"
-LOGOUT_REDIRECT_URL = "shared:login"
-
-PARTNER_LOGIN_URL = "/partners/login/"
-PARTNER_DASHBOARD_URL = "/partners/dashboard/"
+LOGIN_URL = "/auth/login/"
+LOGIN_REDIRECT_URL = "/partners/dashboard/" # Houni bech n'amlou redirection intelligent
+LOGOUT_REDIRECT_URL = "/auth/login/"
 
 SITE_URL_BASE = env("SITE_URL", default="http://localhost:8000")
 

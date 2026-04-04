@@ -44,10 +44,25 @@ from .forms import (
 class CustomLoginView(LoginView):
     template_name = "guard/auth/login.html"
     authentication_form = LoginForm
-    redirect_authenticated_user = True
+    redirect_authenticated_user = False  # ← False pour éviter le loop
 
     def get_success_url(self):
-        return self.get_redirect_url() or reverse_lazy("guard:dashboard")
+        user = self.request.user
+
+        # 1. Admin ou Staff → Guard Dashboard
+        if user.is_superuser or user.is_staff:
+            return reverse_lazy('guard:dashboard')
+
+        # 2. Partner actif → Partner Dashboard
+        if hasattr(user, 'partner_profile'):
+            try:
+                if user.partner_profile.is_active:
+                    return reverse_lazy('partners:dashboard')
+            except Exception:
+                pass
+
+        # 3. Default → partner dashboard (jamais login pour éviter loop)
+        return reverse_lazy('partners:dashboard')
 
     def form_valid(self, form):
         messages.success(self.request, _("Welcome back!"))
@@ -168,16 +183,13 @@ class PageListView(UserPassesTestMixin, LoginRequiredMixin, ListView):
     model = Page
     template_name = "guard/views/pages/list.html"
     context_object_name = "pages"
-    # paginate_by = 10
     ordering = ["slug"]
 
     def test_func(self):
         return self.request.user.is_staff
 
 
-class PageCreateView(
-    UserPassesTestMixin, LoginRequiredMixin, SuccessMessageMixin, CreateView
-):
+class PageCreateView(UserPassesTestMixin, LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Page
     form_class = PageForm
     template_name = "guard/views/pages/index.html"
@@ -188,9 +200,7 @@ class PageCreateView(
         return self.request.user.is_staff
 
 
-class PageUpdateView(
-    UserPassesTestMixin, LoginRequiredMixin, SuccessMessageMixin, UpdateView
-):
+class PageUpdateView(UserPassesTestMixin, LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Page
     form_class = PageForm
     template_name = "guard/views/pages/index.html"
@@ -201,9 +211,7 @@ class PageUpdateView(
         return self.request.user.is_staff
 
 
-class PageDeleteView(
-    UserPassesTestMixin, LoginRequiredMixin, SuccessMessageMixin, DeleteView
-):
+class PageDeleteView(UserPassesTestMixin, LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     model = Page
     success_url = reverse_lazy("shared:pageList")
     success_message = _("Page deleted successfully.")
@@ -219,9 +227,6 @@ class PageDeleteView(
 @login_required
 @require_POST
 def translate_text(request):
-    """
-    API endpoint for translating text between English and French.
-    """
     try:
         data = json.loads(request.body)
         text = data.get("text", "")

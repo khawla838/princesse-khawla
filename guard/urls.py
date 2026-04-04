@@ -49,7 +49,7 @@ from .views import (
 app_name = "guard"
 
 urlpatterns = [
-    path("", DashboardView.as_view(), name="dashboard"),
+    path("dashboard/", DashboardView.as_view(), name="dashboard"),
     path(
         "staff/",
         include(

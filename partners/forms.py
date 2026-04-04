@@ -9,35 +9,45 @@ CSS_SELECT = f'{CSS} bg-white'
 
 
 class PartnerLoginForm(forms.Form):
-    email    = forms.EmailField(widget=forms.EmailInput(attrs={
-        'class':       CSS,
+    email = forms.EmailField(widget=forms.EmailInput(attrs={
+        'class': CSS,
         'placeholder': 'votre@email.com',
     }))
     password = forms.CharField(widget=forms.PasswordInput(attrs={
-        'class':       CSS,
+        'class': CSS,
         'placeholder': '••••••••',
     }))
 
     def clean(self):
-        cleaned  = super().clean()
-        email    = cleaned.get('email')
+        cleaned = super().clean()
+        email = cleaned.get('email')
         password = cleaned.get('password')
 
         if email and password:
             try:
-                partner = Partner.objects.get(email=email, is_active=True)
+                # 1. N-lawjou ala el partner mel email kahaw mel loul
+                partner = Partner.objects.get(email=email)
             except Partner.DoesNotExist:
                 raise ValidationError("Email ou mot de passe incorrect.")
 
+            # 2. Thabet f-el password
             if not partner.check_password(password):
                 raise ValidationError("Email ou mot de passe incorrect.")
 
+            # 3. Thabet f-el "is_active" (Hna el moshkla el kbira)
+            if not partner.is_active:
+                raise ValidationError("Ce compte est inactif. Veuillez contacter l'administrateur.")
+
+            # 4. Thabet f-el verification
+            if not partner.is_verified:
+                raise ValidationError("Votre compte est en attente de vérification.")
+
+            # 5. Thabet f-el frozen (non-paiement)
             if partner.account_frozen:
                 raise ValidationError("Votre compte est suspendu pour non-paiement.")
 
             cleaned['partner'] = partner
         return cleaned
-
 
 class PartnerEventForm(forms.ModelForm):
     class Meta:

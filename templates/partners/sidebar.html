@@ -1,3 +1,4 @@
+{% load static %}
 <aside class="w-64 bg-white border-r border-gray-200 flex flex-col shadow-sm fixed inset-y-0 left-0 z-10">
     <div class="px-6 py-5 border-b border-gray-100">
         <div class="flex items-center gap-3">
@@ -30,11 +31,13 @@
             🖼 Publicités
         </a>
         <a href="{% url 'partners:subscription' %}"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 font-medium text-sm transition">
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 font-medium text-sm transition
+            {% if request.resolver_match.url_name == 'subscription' %}bg-blue-50 text-blue-700{% endif %}">
             💳 Abonnement
         </a>
         <a href="{% url 'partners:account' %}"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 font-medium text-sm transition">
+            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-gray-600 hover:bg-gray-50 font-medium text-sm transition
+            {% if request.resolver_match.url_name == 'account' %}bg-blue-50 text-blue-700{% endif %}">
             ⚙️ Mon compte
         </a>
     </nav>
@@ -46,12 +49,16 @@
             </div>
             <div class="min-w-0">
                 <p class="text-sm font-semibold text-gray-900 truncate">{{ partner.company_name }}</p>
-                <p class="text-xs text-gray-400 truncate">{{ partner.email }}</p>
+                <p class="text-xs text-gray-400 truncate">{{ request.user.email }}</p>
             </div>
         </div>
-        <a href="{% url 'partners:logout' %}"
-            class="flex items-center gap-2 text-sm text-red-500 hover:text-red-700 font-medium transition px-2">
-            🚪 Déconnexion
-        </a>
+        {# Logout via Django auth — POST requis #}
+        <form method="post" action="{% url 'shared:logout' %}">
+            {% csrf_token %}
+            <button type="submit"
+                class="flex items-center gap-2 text-sm text-red-500 hover:text-red-700 font-medium transition px-2 w-full text-left">
+                🚪 Déconnexion
+            </button>
+        </form>
     </div>
 </aside>
