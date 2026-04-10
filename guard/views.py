@@ -7,11 +7,13 @@ from django.views.generic import (
     CreateView, UpdateView, DeleteView,
     ListView, TemplateView, DetailView,
 )
+from partners.models import Receipt 
 from django.urls import reverse_lazy
 from django.utils.translation import gettext as _
 from django.utils import timezone
 from django.shortcuts import redirect, get_object_or_404
 from django.views import View
+from django.db import models
 
 import logging
 logger = logging.getLogger(__name__)
@@ -333,3 +335,58 @@ def check_user_type(request):
     if request.user.is_staff:
         return redirect('guard:dashboard')
     return redirect('/')
+# ── PRICING SETTINGS ──────────────────────────────────────────────────────────
+
+from shared.models import PricingSettings
+
+class PricingSettingsView(StaffRequiredMixin, LoginRequiredMixin, TemplateView):
+    template_name = "guard/views/pricing_settings.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pricing"] = PricingSettings.get()
+        return context
+
+    def post(self, request, *args, **kwargs):
+        pricing = PricingSettings.get()
+        boost = request.POST.get("boost_price_per_day")
+        ad    = request.POST.get("ad_price_per_day")
+        if boost:
+            pricing.boost_price_per_day = boost
+        if ad:
+            pricing.ad_price_per_day = ad
+        pricing.updated_by = request.user
+        pricing.save()
+        messages.success(request, "Prix mis à jour avec succès.")
+        return redirect(request.path)
+
+# ── RECEIPTS ──────────────────────────────────────────────────────────────────
+
+from partners.models import ReceiptHistory
+
+class ReceiptListView(StaffRequiredMixin, LoginRequiredMixin, ListView):
+    model               = ReceiptHistory
+    template_name       = "guard/views/receipts/list.html"
+    context_object_name = "receipts"
+    ordering            = ['-created_at']
+    paginate_by         = 25
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related('partner')
+        q  = self.request.GET.get('q', '').strip()
+        pt = self.request.GET.get('payment_type', '').strip()
+        if q:
+            qs = qs.filter(
+                models.Q(receipt_number__icontains=q) |
+                models.Q(sent_to_email__icontains=q)  |
+                models.Q(partner__company_name__icontains=q)
+            )
+        if pt:
+            qs = qs.filter(payment_type=pt)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['q']            = self.request.GET.get('q', '')
+        context['payment_type'] = self.request.GET.get('payment_type', '')
+        return context

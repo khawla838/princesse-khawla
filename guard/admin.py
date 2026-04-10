@@ -19,6 +19,7 @@ from .models import (
     Sponsor,
 )
 from modeltranslation.admin import TranslationAdmin
+from partners.models import ReceiptHistory
 from guard.models import DashboardStatistics, ActivityLog, NotificationLog
 
 
@@ -388,3 +389,21 @@ class NotificationLogAdmin(admin.ModelAdmin):
         """Logs sont créés automatiquement"""
         return False
 
+
+@admin.register(ReceiptHistory)
+class ReceiptHistoryAdmin(admin.ModelAdmin):
+    list_display  = ['receipt_number', 'partner', 'payment_type', 'amount', 'sent_to_email', 'created_at']
+    list_filter   = ['payment_type', 'created_at']
+    search_fields = ['receipt_number', 'sent_to_email', 'partner__company_name', 'payment_ref']
+    readonly_fields = [
+        'receipt_number', 'partner', 'payment_type', 'amount',
+        'client_code', 'payment_ref', 'label', 'details',
+        'sent_to_email', 'created_at',
+    ]
+    ordering = ['-created_at']
+
+    def has_add_permission(self, request):
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False

@@ -60,7 +60,7 @@
               {% endif %}
             </div>
 
-            <p class="text-gray-500 text-sm mb-3">{{ event.description|truncatechars:120 }}</p>
+            <p class="text-gray-500 text-sm mb-3">{{ event.description|striptags|truncatechars:120 }}</p>
 
             <div class="flex items-center gap-5 text-sm text-gray-400 flex-wrap">
               <span>📅 {{ event.start_date|date:"d M Y" }} → {{ event.end_date|date:"d M Y" }}</span>

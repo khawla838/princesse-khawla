@@ -28,7 +28,7 @@
             </div>
             <div class="flex justify-between border-t border-purple-200 pt-2 mt-2">
               <span class="font-bold">Total</span>
-              <span class="font-bold text-xl text-purple-800">{{ boost_price }}</span>
+              <span class="font-bold text-xl text-purple-800">{{ event.boost_price|floatformat:"-3" }} TND</span>
             </div>
           </div>
         </div>
@@ -47,7 +47,7 @@
           {% csrf_token %}
           <button type="submit"
             class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl transition shadow-md text-lg">
-            Payer {{ boost_price }} avec Konnect →
+            Payer {{ event.boost_price|floatformat:"-3" }} TND →
           </button>
         </form>
 

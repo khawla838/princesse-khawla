@@ -54,7 +54,7 @@
           <h3 class="font-bold text-orange-800 mb-1">🚀 Package Boost Événement</h3>
           <p class="text-xs text-orange-600 mb-3">Mise en avant de vos événements</p>
           <ul class="text-sm text-orange-700 space-y-1">
-            <li>• Prix : <strong>2 TND / jour</strong></li>
+            <li>• Prix : <strong>{{ boost_price_per_day |floatformat:"-3"}} TND / jour</strong></li>
             <li>• Calculé sur la durée de l'événement</li>
             <li>• Disponible si début ≥ 14 jours</li>
             <li>• Priorité dans l'affichage</li>
@@ -66,7 +66,7 @@
           <h3 class="font-bold text-purple-800 mb-1">🖼 Package Publicité</h3>
           <p class="text-xs text-purple-600 mb-3">Bannières publicitaires dans l'app</p>
           <ul class="text-sm text-purple-700 space-y-1">
-            <li>• Prix : <strong>2 TND / jour</strong></li>
+            <li>• Prix : <strong>{{ ad_price_per_day|floatformat:"-3"}} TND / jour</strong></li>
             <li>• GIF animé ou image statique</li>
             <li>• Lien de redirection personnalisé</li>
             <li>• Activation après paiement</li>
@@ -94,9 +94,9 @@
                 <div class="period-box border-2 rounded-xl p-4 text-center transition hover:border-blue-400
                   {% if forloop.first %}border-blue-500 bg-blue-50{% else %}border-gray-200{% endif %}">
                   <p class="font-bold text-gray-900">{{ info.label }}</p>
-                  <p class="text-blue-600 font-semibold text-sm mt-1">{{ info.total }} TND</p>
+                  <p class="text-blue-600 font-semibold text-sm mt-1">{{ info.total |floatformat:"-3" }} TND</p>
                   {% if info.saving > 0 %}
-                  <p class="text-green-500 text-xs mt-0.5">-{{ info.saving }} TND</p>
+                  <p class="text-green-500 text-xs mt-0.5">-{{ info.saving |floatformat:"-3" }} TND</p>
                   {% endif %}
                 </div>
               </label>
@@ -156,7 +156,7 @@
                 <p class="text-sm font-medium text-blue-700" id="summary-label">Montant à payer</p>
                 <p class="text-xs text-blue-500 mt-0.5" id="summary-detail"></p>
               </div>
-              <p class="text-2xl font-bold text-blue-700" id="summary-price">10.000 TND</p>
+              <p class="text-2xl font-bold text-blue-700" id="summary-price">10 TND</p>
             </div>
           </div>
 
@@ -184,10 +184,10 @@
             {% for period, info in periods.items %}
             <tr class="border-b border-gray-50 hover:bg-gray-50">
               <td class="py-3 font-medium text-gray-900">{{ info.label }}</td>
-              <td class="py-3 text-right text-gray-700">{{ info.total }} TND</td>
-              <td class="py-3 text-right text-blue-600 font-medium">{{ info.monthly }} TND</td>
+              <td class="py-3 text-right text-gray-700">{{ info.total |floatformat:"-3" }} TND</td>
+              <td class="py-3 text-right text-blue-600 font-medium">{{ info.monthly |floatformat:"-3" }} TND</td>
               <td class="py-3 text-right text-green-600 font-medium">
-                {% if info.saving > 0 %}-{{ info.saving }} TND{% else %}—{% endif %}
+                {% if info.saving > 0 %}-{{ info.saving |floatformat:"-3" }} TND{% else %}—{% endif %}
               </td>
             </tr>
             {% endfor %}
@@ -201,11 +201,11 @@
 
 <script>
 const PRICES = {
-  '1_month':   { total: 10.000, monthly: 10.000, label: '1 Mois' },
-  '3_months':  { total: 25.000, monthly: 8.333,  label: '3 Mois' },
-  '6_months':  { total: 50.000, monthly: 8.333,  label: '6 Mois' },
-  '10_months': { total: 80.000, monthly: 8.000,  label: '10 Mois' },
-  '12_months': { total: 100.000, monthly: 8.333, label: '1 An' },
+  '1_month':   { total: 10 monthly: 10, label: '1 Mois' },
+  '3_months':  { total: 25 monthly: 8.333,  label: '3 Mois' },
+  '6_months':  { total: 50 monthly: 8.333,  label: '6 Mois' },
+  '10_months': { total: 80 monthly: 8.000,  label: '10 Mois' },
+  '12_months': { total: 100 monthly: 8.333, label: '1 An' },
 };
 
 let discountPct = {% if applied_coupon %}{{ applied_coupon.discount_percentage }}{% else %}0{% endif %};

@@ -38,12 +38,14 @@ from .views import (
     SponsorListView,
     SponsorCreateView,
     SponsorUpdateView,
+    PricingSettingsView,
     SponsorDeleteView,
     get_cities_by_country,
     get_subregions_by_city,
     get_all_subregions,
     get_schedules,
     get_locations_by_city,
+    ReceiptListView,
 )
 
 app_name = "guard"
@@ -168,6 +170,11 @@ urlpatterns = [
                     SponsorDeleteView.as_view(),
                     name="sponsor_delete",
                 ),
+                path(
+                    "receipts/list/",
+                    ReceiptListView.as_view(),
+                    name="receipt_list",
+                ),
             ]
         ),
     ),
@@ -201,4 +208,10 @@ urlpatterns = [
         get_schedules,
         name='get_schedules'
     ),
+    path(
+        "settings/pricing/",
+        PricingSettingsView.as_view(),
+        name="pricing_settings",
+    ),
+
 ]

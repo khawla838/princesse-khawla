@@ -257,3 +257,68 @@ class Package(models.Model):
 
     def get_absolute_url(self):
         return reverse("package_detail", kwargs={"pk": self.pk})
+
+    class Meta:
+        verbose_name        = _("Paramètres de prix")
+        verbose_name_plural = _("Paramètres de prix")
+
+    def __str__(self):
+        return f"Boost: {self.boost_price_per_day} TND/j | Pub: {self.ad_price_per_day} TND/j"
+
+    @classmethod
+    def get(cls):
+        """Récupère ou crée le singleton."""
+        obj, _ = cls.objects.get_or_create(pk=1, defaults={
+            'boost_price_per_day': 5.000,
+            'ad_price_per_day': 3.000,
+        })
+        return obj
+
+# ── À ajouter à la fin de shared/models.py ───────────────────────────────────
+
+class PricingSettings(models.Model):
+    """
+    Singleton — pk=1 toujours.
+    Prix configurables depuis l'admin Django.
+    """
+    boost_price_per_day = models.DecimalField(
+        max_digits=8, decimal_places=3,
+        default=5.000,
+        verbose_name=_("Prix boost événement (TND/jour)"),
+        help_text=_("Prix facturé par jour pour booster un événement partenaire.")
+    )
+    ad_price_per_day = models.DecimalField(
+        max_digits=8, decimal_places=3,
+        default=3.000,
+        verbose_name=_("Prix publicité (TND/jour)"),
+        help_text=_("Prix facturé par jour pour une publicité partenaire.")
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True, blank=True,
+        related_name='pricing_updates'
+    )
+
+    class Meta:
+        verbose_name        = _("Paramètres de prix")
+        verbose_name_plural = _("Paramètres de prix")
+
+    def __str__(self):
+        return f"Boost: {self.boost_price_per_day} TND/j | Pub: {self.ad_price_per_day} TND/j"
+
+    @classmethod
+    def get(cls) -> 'PricingSettings':
+        obj, _ = cls.objects.get_or_create(pk=1, defaults={
+            'boost_price_per_day': 5.000,
+            'ad_price_per_day':    3.000,
+        })
+        return obj
+
+    def save(self, *args, **kwargs):
+        self.pk = 1  # force singleton
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        pass  # interdit la suppression

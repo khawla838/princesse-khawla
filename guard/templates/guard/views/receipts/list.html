@@ -1,0 +1,182 @@
+{% extends "guard/base.html" %}
+{% block content %}
+<div class="min-h-screen bg-slate-50 p-8">
+
+  <!-- PAGE HEADER -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <p class="text-xs font-bold tracking-widest uppercase text-slate-400 mb-1">Administration</p>
+      <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Reçus de paiement</h1>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="bg-blue-600 text-white px-4 py-1.5 rounded-full text-xs font-bold tracking-wide shadow">
+        {{ paginator.count }} reçu{% if paginator.count > 1 %}s{% endif %}
+      </span>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <form method="get"
+        class="flex flex-wrap gap-3 mb-8 bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
+    <div class="relative flex-1 min-w-[220px]">
+      <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"/>
+      </svg>
+      <input type="text" name="q" value="{{ q }}"
+             placeholder="N° reçu, email, partenaire…"
+             class="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition bg-slate-50">
+    </div>
+
+    <select name="payment_type"
+            class="border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-blue-500 bg-slate-50 text-slate-600">
+      <option value="">Tous les types</option>
+      <option value="subscription" {% if payment_type == 'subscription' %}selected{% endif %}>Abonnement</option>
+      <option value="boost"        {% if payment_type == 'boost'        %}selected{% endif %}>Boost</option>
+      <option value="ad"           {% if payment_type == 'ad'           %}selected{% endif %}>Publicité</option>
+    </select>
+
+    <button type="submit"
+            class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white px-6 py-2.5 rounded-xl font-bold text-sm transition shadow-sm">
+      Filtrer
+    </button>
+
+    {% if q or payment_type %}
+    <a href="?" class="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-700 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+      Effacer
+    </a>
+    {% endif %}
+  </form>
+
+  <!-- TABLE CARD -->
+  <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+    <table class="w-full text-sm">
+      <thead>
+        <tr class="border-b border-slate-100 bg-slate-50">
+          <th class="px-6 py-4 text-left text-[10px] font-bold tracking-widest uppercase text-slate-400">Référence</th>
+          <th class="px-6 py-4 text-left text-[10px] font-bold tracking-widest uppercase text-slate-400">Partenaire</th>
+          <th class="px-6 py-4 text-left text-[10px] font-bold tracking-widest uppercase text-slate-400">Type</th>
+          <th class="px-6 py-4 text-right text-[10px] font-bold tracking-widest uppercase text-slate-400">Montant</th>
+          <th class="px-6 py-4 text-center text-[10px] font-bold tracking-widest uppercase text-slate-400">Date</th>
+          <th class="px-6 py-4 text-center text-[10px] font-bold tracking-widest uppercase text-slate-400">PDF</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-50">
+        {% for receipt in receipts %}
+        <tr class="hover:bg-blue-50/40 transition-colors group">
+
+          <!-- REF -->
+          <td class="px-6 py-4">
+            <span class="font-mono font-extrabold text-blue-600 tracking-wide">
+              REC-{{ receipt.receipt_number }}
+            </span>
+          </td>
+
+          <!-- PARTNER -->
+          <td class="px-6 py-4">
+            <p class="font-bold text-slate-800 leading-tight">
+              {{ receipt.partner.company_name|default:"—" }}
+            </p>
+            <p class="text-[11px] text-slate-400 mt-0.5">{{ receipt.sent_to_email }}</p>
+          </td>
+
+          <!-- TYPE -->
+          <td class="px-6 py-4">
+            {% if receipt.payment_type == 'subscription' %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 rounded-lg text-[10px] font-bold uppercase tracking-wide">
+                <span class="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
+                Abonnement
+              </span>
+            {% elif receipt.payment_type == 'boost' %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-violet-50 text-violet-700 rounded-lg text-[10px] font-bold uppercase tracking-wide">
+                <span class="w-1.5 h-1.5 bg-violet-500 rounded-full"></span>
+                Boost
+              </span>
+            {% else %}
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-[10px] font-bold uppercase tracking-wide">
+                <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                Publicité
+              </span>
+            {% endif %}
+          </td>
+
+          <!-- AMOUNT -->
+          <td class="px-6 py-4 text-right">
+            <span class="font-black text-slate-900 text-[15px] tabular-nums">
+              {{ receipt.amount }}
+            </span>
+            <span class="text-slate-400 text-xs font-semibold ml-1">TND</span>
+          </td>
+
+          <!-- DATE -->
+          <td class="px-6 py-4 text-center">
+            <span class="text-slate-500 text-xs font-medium bg-slate-100 px-3 py-1 rounded-full">
+              {{ receipt.created_at|date:"d/m/Y" }}
+            </span>
+          </td>
+
+          <!-- PDF DOWNLOAD -->
+          <td class="px-6 py-4 text-center">
+            {% if receipt.pdf_file %}
+            <a href="{{ receipt.pdf_file.url }}"
+               target="_blank"
+               class="inline-flex items-center gap-1.5 text-[11px] font-bold text-white bg-slate-800 hover:bg-blue-600 px-3 py-1.5 rounded-lg transition shadow-sm active:scale-95">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 10v6m0 0l-3-3m3 3l3-3M3 17V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+              </svg>
+              PDF
+            </a>
+            {% else %}
+            <span class="text-slate-300 text-[11px]">—</span>
+            {% endif %}
+          </td>
+
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="px-6 py-16 text-center">
+            <div class="flex flex-col items-center gap-3 text-slate-400">
+              <svg class="w-10 h-10 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 9.414V19a2 2 0 01-2 2z"/>
+              </svg>
+              <p class="text-sm font-medium">Aucun reçu trouvé</p>
+              {% if q or payment_type %}
+              <a href="?" class="text-xs text-blue-500 hover:underline">Effacer les filtres</a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <!-- PAGINATION -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50">
+      <p class="text-xs text-slate-400 font-medium">
+        Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+      </p>
+      <div class="flex gap-2">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if payment_type %}&payment_type={{ payment_type }}{% endif %}"
+           class="px-4 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition">
+          ← Précédent
+        </a>
+        {% endif %}
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if payment_type %}&payment_type={{ payment_type }}{% endif %}"
+           class="px-4 py-2 text-xs font-bold text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-blue-50 hover:border-blue-300 transition">
+          Suivant →
+        </a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

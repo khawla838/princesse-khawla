@@ -12,7 +12,6 @@ DEBUG = env.bool("DEBUG", default=True)
 ASGI_APPLICATION = 'core.asgi.application'
 
 INSTALLED_APPS = [
-    # "daphne" supprimé — on utilise python manage.py runserver
     "modeltranslation",
     "cities_light",
     "django.contrib.admin",
@@ -130,7 +129,7 @@ CITIES_LIGHT_INCLUDE_COUNTRIES = ["TN", "MA", "DZ", "LY", "EG", "LB", "YE", "SY"
 CITIES_LIGHT_INCLUDE_CITY_TYPES = ["PPL", "PPLA", "PPLA2", "PPLA3", "PPLA4", "PPLC"]
 
 LOGIN_URL = "/auth/login/"
-LOGIN_REDIRECT_URL = "/partners/dashboard/" # Houni bech n'amlou redirection intelligent
+LOGIN_REDIRECT_URL = "/partners/dashboard/"
 LOGOUT_REDIRECT_URL = "/auth/login/"
 
 SITE_URL_BASE = env("SITE_URL", default="http://localhost:8000")
@@ -139,7 +138,14 @@ if DEBUG:
     SITE_URL = "http://localhost:8000"
     CORS_ALLOW_ALL_ORIGINS = DEBUG
     ALLOWED_HOSTS = ["localhost", "127.0.0.1", "127.0.0.1:8000"]
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = env("EMAIL_HOST")
+    EMAIL_PORT = env.int("EMAIL_PORT")
+    EMAIL_HOST_USER = env("EMAIL_HOST_USER")
+    EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
+    EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
+    EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL")
+    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="FielMedina <noreply@fielmedina.com>")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -165,6 +171,7 @@ else:
     EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
     EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS")
     EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL")
+    DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="FielMedina <noreply@fielmedina.com>")
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
@@ -190,9 +197,7 @@ SHORT_IO_DOMAIN = env("SHORT_IO_DOMAIN")
 SHORT_IO_FOLDER_ID = env("SHORT_IO_FOLDER_ID")
 DJANGO_ADMIN_URL = env("DJANGO_ADMIN_URL")
 
-# ============================================
-# Firebase Cloud Messaging (FCM)
-# ============================================
+# ── Firebase ──────────────────────────────────────────────────────────────────
 GOOGLE_APPLICATION_CREDENTIALS = env(
     "GOOGLE_APPLICATION_CREDENTIALS",
     default=str(BASE_DIR / "fielmedinasousse-firebase-adminsdk-fbsvc-32939c9c5a.json"),
@@ -216,9 +221,7 @@ FIREBASE_CLIENT_CONFIG = {
     "measurementId": env("FIREBASE_MEASUREMENT_ID", default="G-KMEWT7N3ND"),
 }
 
-# ============================================
-# Konnect Payment Gateway
-# ============================================
+# ── Konnect ───────────────────────────────────────────────────────────────────
 KONNECT_API_KEY = env("KONNECT_API_KEY", default="")
 KONNECT_WALLET_ID = env("KONNECT_WALLET_ID", default="")
 KONNECT_BASE_URL = env(

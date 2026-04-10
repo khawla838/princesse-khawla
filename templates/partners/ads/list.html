@@ -10,7 +10,7 @@
     <div class="flex items-center justify-between mb-8">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Mes Publicités</h1>
-        <p class="text-gray-500 mt-1">Gérez vos annonces — 5.000 TND / jour</p>
+        <p class="text-gray-500 mt-1">Gérez vos annonces — {{ ad_price_per_day |floatformat:"-3"}} DT / jour</p>
       </div>
       {% if can_add %}
       <a href="{% url 'partners:ad_create' %}"

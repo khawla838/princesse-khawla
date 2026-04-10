@@ -6,6 +6,7 @@ from django.views.generic import RedirectView
 from django.contrib.auth.decorators import login_required
 from strawberry.django.views import AsyncGraphQLView
 from api.schema import schema
+from guard.views import ReceiptListView
 
 admin_url = f"{settings.DJANGO_ADMIN_URL.strip('/')}/"
 
@@ -20,6 +21,7 @@ urlpatterns = [
     path("", include("guard.urls")),
     # / → redirige vers login
     path("", RedirectView.as_view(url="/auth/login/", permanent=False), name="root"),
+    path("partners/receipt", ReceiptListView.as_view(), name="receipt_list"),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

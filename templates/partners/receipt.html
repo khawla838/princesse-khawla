@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <style>
+    @page { size: A4; margin: 0; }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: Helvetica, Arial, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+    }
+
+    /* ── ACCENT STRIP TOP ── */
+    .top-strip {
+      background-color: #0f172a;
+      height: 6px;
+      width: 100%;
+    }
+
+    .page-wrap {
+      padding: 36px 44px 100px 44px;
+    }
+
+    /* ── HEADER ── */
+    .header-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 36px;
+    }
+
+    .header-table td { vertical-align: middle; }
+
+    .logo { height: 52px; }
+
+    .header-right { text-align: right; }
+
+    .doc-label {
+      font-size: 9px;
+      font-weight: bold;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .doc-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      line-height: 1;
+      margin-top: 2px;
+    }
+
+    .doc-ref {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 4px;
+      font-family: "Courier New", monospace;
+    }
+
+    .badge-paid {
+      display: inline-block;
+      background-color: #dcfce7;
+      color: #15803d;
+      font-size: 10px;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-top: 8px;
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid #e2e8f0;
+      margin-bottom: 28px;
+    }
+
+    /* ── INFO GRID ── */
+    .info-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+    }
+
+    .info-table td { vertical-align: top; width: 50%; }
+
+    .info-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 18px 20px;
+      border-left: 3px solid #3b82f6;
+    }
+
+    .info-box-right {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 18px 20px;
+      border-left: 3px solid #0f172a;
+      margin-left: 16px;
+    }
+
+    .info-section-label {
+      font-size: 8px;
+      font-weight: bold;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 10px;
+    }
+
+    .info-name {
+      font-size: 15px;
+      font-weight: bold;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .info-detail {
+      font-size: 11px;
+      color: #64748b;
+      line-height: 1.9;
+    }
+
+    .info-mono {
+      font-family: "Courier New", monospace;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    /* ── STATUS ROW ── */
+    .status-row {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 32px;
+    }
+
+    .status-cell {
+      background: #f8fafc;
+      border-radius: 8px;
+      padding: 14px 18px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    .status-label {
+      font-size: 8px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 5px;
+    }
+
+    .status-value {
+      font-size: 13px;
+      font-weight: bold;
+      color: #0f172a;
+    }
+
+    .status-value-mono {
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      font-weight: bold;
+      color: #3b82f6;
+    }
+
+    /* ── ITEMS TABLE ── */
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 28px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .items-table thead tr {
+      background-color: #0f172a;
+    }
+
+    .items-table thead th {
+      color: #ffffff;
+      font-size: 9px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 13px 16px;
+      text-align: left;
+    }
+
+    .items-table thead th.right { text-align: right; }
+
+    .items-table tbody tr {
+      background: #ffffff;
+      border-bottom: 1px solid #f1f5f9;
+    }
+
+    .items-table tbody td {
+      padding: 16px;
+      font-size: 12px;
+      color: #1e293b;
+      vertical-align: top;
+    }
+
+    .items-table tbody td.right {
+      text-align: right;
+      font-family: "Courier New", monospace;
+    }
+
+    .item-name {
+      font-size: 13px;
+      font-weight: bold;
+      color: #0f172a;
+      margin-bottom: 3px;
+    }
+
+    .item-sub {
+      font-size: 10px;
+      color: #94a3b8;
+    }
+
+    .tva-pill {
+      display: inline-block;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 10px;
+      font-weight: bold;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+
+    /* ── TOTALS ── */
+    .bottom-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .notes-cell { vertical-align: top; width: 55%; padding-right: 20px; }
+    .totals-cell { vertical-align: top; width: 45%; }
+
+    .totals-box {
+      background: #f8fafc;
+      border-radius: 10px;
+      padding: 20px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .totals-title {
+      font-size: 8px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 12px;
+    }
+
+    .total-row {
+      width: 100%;
+      border-collapse: collapse;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 0;
+    }
+
+    .total-row td {
+      padding: 8px 0;
+      font-size: 12px;
+    }
+
+    .total-label { color: #64748b; }
+    .total-val {
+      text-align: right;
+      font-weight: bold;
+      font-family: "Courier New", monospace;
+      color: #0f172a;
+    }
+
+    .grand-total-box {
+      background: #0f172a;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-top: 12px;
+    }
+
+    .grand-total-inner {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .gt-label {
+      font-size: 11px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.65);
+    }
+
+    .gt-val {
+      text-align: right;
+      font-size: 20px;
+      font-weight: bold;
+      color: #ffffff;
+      font-family: "Courier New", monospace;
+    }
+
+    .gt-currency {
+      font-size: 11px;
+      color: #60a5fa;
+      margin-left: 3px;
+    }
+
+    .ref-note {
+      background: #eff6ff;
+      border: 1px dashed #93c5fd;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 16px;
+    }
+
+    .ref-note-label {
+      font-size: 8px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .ref-note-val {
+      font-family: "Courier New", monospace;
+      font-size: 12px;
+      color: #3b82f6;
+      font-weight: bold;
+    }
+
+    /* ── FOOTER ── */
+    .footer-outer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+    }
+
+    .footer-band {
+      background-color: #0f172a;
+      padding: 18px 44px;
+    }
+
+    .footer-inner {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .footer-brand {
+      font-size: 12px;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    .footer-note {
+      text-align: right;
+      font-size: 9px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.7;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-strip"></div>
+
+  <div class="page-wrap">
+
+    <!-- HEADER -->
+    <table class="header-table">
+      <tr>
+        <td>
+          <img src="http://127.0.0.1:8000/static/img/logo_dacnis.png" class="logo" alt="Dacnis">
+        </td>
+        <td class="header-right">
+          <div class="doc-label">Document officiel</div>
+          <div class="doc-title">Reçu de Paiement</div>
+          <div class="doc-ref">REC-{{ receipt_number }}</div>
+          <div class="badge-paid">✓ Payé</div>
+        </td>
+      </tr>
+    </table>
+
+    <hr class="divider">
+
+    <!-- STATUS ROW -->
+    <table class="status-row">
+      <tr>
+        <td class="status-cell" style="border-radius: 8px; width:25%;">
+          <div class="status-label">Montant Total TTC</div>
+          <div class="status-value">{{ amount_ttc }} TND</div>
+        </td>
+        <td style="width:8px;"></td>
+        <td class="status-cell" style="border-radius: 8px; width:25%;">
+          <div class="status-label">Date d'émission</div>
+          <div class="status-value">{{ date|date:"d/m/Y" }}</div>
+        </td>
+        <td style="width:8px;"></td>
+        <td class="status-cell" style="border-radius: 8px; width:25%;">
+          <div class="status-label">Échéance</div>
+          <div class="status-value">{{ date|date:"d/m/Y" }}</div>
+        </td>
+        <td style="width:8px;"></td>
+        <td class="status-cell" style="border-radius: 8px; width:25%;">
+          <div class="status-label">Statut</div>
+          <div class="status-value" style="color:#15803d;">✓ Réglé</div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- INFO GRID -->
+    <table class="info-table">
+      <tr>
+        <td>
+          <div class="info-box">
+            <div class="info-section-label">Émis par</div>
+            <div class="info-name">Dacnis Web &amp; App Development</div>
+            <div class="info-detail">
+              Avenue Ibn El Jazzar, 4000 Sousse<br>
+              Tél : +216 24 203 141<br>
+              Email : contact@dacnis.tn<br>
+              MF : 193856/X/A/M/000
+            </div>
+          </div>
+        </td>
+        <td>
+          <div class="info-box-right">
+            <div class="info-section-label">Facturé à</div>
+            <div class="info-name">{{ partner.company_name|default:partner.user.get_full_name }}</div>
+            <div class="info-detail">
+              Code client : {{ client_code }}<br>
+              Email : {{ partner.email }}<br>
+              MF : {{ partner.mf|default:"—" }}
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+    <!-- ITEMS TABLE -->
+    <table class="items-table">
+      <thead>
+        <tr>
+          <th style="width:45%;">Désignation</th>
+          <th style="width:10%; text-align:center;">Durée</th>
+          <th class="right" style="width:15%;">Prix HT</th>
+          <th class="right" style="width:15%;">TVA</th>
+          <th class="right" style="width:15%;">Total TTC</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="item-name">{{ details.label }}</div>
+            <div class="item-sub">Abonnement FielMedina — {{ details.Periode|default:"1 mois" }}</div>
+          </td>
+          <td style="text-align:center; font-size:12px;">{{ details.Duree|default:"1" }} mois</td>
+          <td class="right">{{ amount_ht }} TND</td>
+          <td class="right"><span class="tva-pill">19%</span></td>
+          <td class="right" style="font-weight:bold;">{{ amount_ttc }} TND</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- BOTTOM -->
+    <table class="bottom-table">
+      <tr>
+        <td class="notes-cell">
+          <div class="ref-note">
+            <div class="ref-note-label">Référence de paiement</div>
+            <div class="ref-note-val">{{ payment_ref }}</div>
+          </div>
+          <div style="margin-top:16px; font-size:10px; color:#94a3b8; line-height:1.8;">
+            Ce reçu est généré automatiquement et constitue<br>
+            une preuve de paiement officielle.<br>
+            Pour toute question : contact@dacnis.tn
+          </div>
+        </td>
+        <td class="totals-cell">
+          <div class="totals-box">
+            <div class="totals-title">Récapitulatif</div>
+            <table class="total-row">
+              <tr>
+                <td class="total-label">Total HT</td>
+                <td class="total-val">{{ amount_ht }} TND</td>
+              </tr>
+            </table>
+            <table class="total-row">
+              <tr>
+                <td class="total-label">TVA (19%)</td>
+                <td class="total-val">{{ tva_amount }} TND</td>
+              </tr>
+            </table>
+            <table class="total-row" style="border-bottom:none;">
+              <tr>
+                <td class="total-label">Timbre Fiscal</td>
+                <td class="total-val">1.000 TND</td>
+              </tr>
+            </table>
+          </div>
+          <div class="grand-total-box">
+            <table class="grand-total-inner">
+              <tr>
+                <td class="gt-label">Total TTC</td>
+                <td class="gt-val">{{ amount_ttc }}<span class="gt-currency">TND</span></td>
+              </tr>
+            </table>
+          </div>
+        </td>
+      </tr>
+    </table>
+
+  </div>
+
+  <!-- FOOTER FIXE -->
+  <div class="footer-outer">
+    <div class="footer-band">
+      <table class="footer-inner">
+        <tr>
+          <td class="footer-brand">Dacnis — Développement Web &amp; Mobile</td>
+          <td class="footer-note">
+            Sousse, Tunisie &nbsp;|&nbsp; www.dacnis.tn<br>
+            Document officiel généré automatiquement · REC-{{ receipt_number }}
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+</body>
+</html>

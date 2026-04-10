@@ -3,6 +3,8 @@ from django.utils import timezone
 from django.contrib import messages
 from django.utils.html import format_html
 from django import forms
+from django.core.mail import send_mail
+from django.conf import settings
 from .models import (
     Partner, PartnerContract, PartnerEvent,
     PartnerEventMedia, PartnerAd, Coupon, AdminNotification
@@ -41,6 +43,111 @@ def verify_partner(modeladmin, request, queryset):
     messages.success(request, f"{count} partenaire(s) vérifié(s).")
 verify_partner.short_description = "✅ Vérifier le partenaire"
 
+def send_terms_changed_email(modeladmin, request, queryset):
+    from datetime import date
+    today = date.today()
+    count_email = 0
+    count_frozen = 0
+
+    for partner in queryset:
+        should_freeze = (
+            (partner.is_trial and partner.trial_end and partner.trial_end < today)
+            or
+            (not partner.is_trial and (not partner.contract_end or partner.contract_end < today))
+        )
+
+        try:
+            if should_freeze:
+                send_mail(
+                    subject="📢 Mise à jour conditions + Suspension de votre compte FielMedina",
+                    message=f"""Bonjour {partner.company_name},
+
+Nous vous informons que les conditions générales d'utilisation de FielMedina ont été mises à jour.
+
+Suite à cette mise à jour, votre compte a été suspendu car votre période d'essai
+ou votre abonnement n'est plus actif.
+
+Pour réactiver votre compte, veuillez souscrire à un abonnement :
+{settings.SITE_URL}/partners/subscription/
+
+Cordialement,
+L'équipe FielMedina""",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[partner.email],
+                    fail_silently=False,
+                )
+                partner.account_frozen = True
+                partner.is_verified    = False
+                partner.save(update_fields=['account_frozen', 'is_verified'])
+                count_frozen += 1
+            else:
+                send_mail(
+                    subject="📢 Mise à jour des conditions générales FielMedina",
+                    message=f"""Bonjour {partner.company_name},
+
+Nous vous informons que les conditions générales d'utilisation de FielMedina ont été mises à jour.
+
+Pour consulter les nouvelles conditions et continuer à utiliser nos services :
+{settings.SITE_URL}/partners/subscription/
+
+Cordialement,
+L'équipe FielMedina""",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[partner.email],
+                    fail_silently=False,
+                )
+            count_email += 1
+        except Exception as e:
+            messages.error(request, f"Erreur pour {partner.email}: {e}")
+
+    messages.success(
+        request,
+        f"{count_email} email(s) envoyé(s). {count_frozen} compte(s) suspendu(s)."
+    )
+send_terms_changed_email.short_description = "📧 Envoyer email conditions + suspendre non payants"
+
+
+def convert_trial_to_paid(modeladmin, request, queryset):
+    count = 0
+    for partner in queryset.filter(is_trial=True):
+        partner.is_trial       = False
+        partner.is_verified    = True
+        partner.account_frozen = False
+        partner.save(update_fields=['is_trial', 'is_verified', 'account_frozen'])
+        count += 1
+    messages.success(request, f"{count} partenaire(s) converti(s) en payant.")
+convert_trial_to_paid.short_description = "💳 Convertir trial → payant"
+
+
+def send_trial_expiry_email(modeladmin, request, queryset):
+    count = 0
+    for partner in queryset:
+        try:
+            send_mail(
+                subject="Votre période d'essai FielMedina a expiré",
+                message=f"""Bonjour {partner.company_name},
+
+Votre période d'essai gratuite de 6 mois sur FielMedina a expiré le {partner.trial_end.strftime('%d/%m/%Y') if partner.trial_end else '—'}.
+
+Pour continuer à bénéficier de nos services :
+{settings.SITE_URL}/partners/subscription/
+
+Cordialement,
+L'équipe FielMedina""",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[partner.email],
+                fail_silently=False,
+            )
+            partner.trial_notified = True
+            partner.is_verified    = False
+            partner.save(update_fields=['trial_notified', 'is_verified'])
+            count += 1
+        except Exception as e:
+            messages.error(request, f"Erreur pour {partner.email}: {e}")
+    messages.success(request, f"{count} email(s) d'expiration envoyé(s).")
+send_trial_expiry_email.short_description = "⏰ Envoyer email expiration trial"
+
+
 # ── Partner Admin Form ────────────────────────────────────────────────────────
 
 class PartnerAdminForm(forms.ModelForm):
@@ -57,12 +164,10 @@ class PartnerAdminForm(forms.ModelForm):
             email = email.strip().lower()
             cleaned_data['email'] = email
 
-        # Auto-fill email from selected user if email field is empty
         if not email and user and user.email:
             email = user.email.strip().lower()
             cleaned_data['email'] = email
 
-        # Friendly duplicate check instead of raw IntegrityError
         if email:
             qs = Partner.objects.filter(email=email)
             if self.instance.pk:
@@ -75,6 +180,7 @@ class PartnerAdminForm(forms.ModelForm):
 
         return cleaned_data
 
+
 # ── Admin Partner ─────────────────────────────────────────────────────────────
 
 @admin.register(Partner)
@@ -82,18 +188,25 @@ class PartnerAdmin(admin.ModelAdmin):
     form = PartnerAdminForm
 
     list_display  = [
-        'company_name', 'get_email', 'status_display',
+        'company_name', 'get_email', 'status_display', 'trial_display',
         'contract_end', 'days_left_display',
-        'pending_email_display', 'unpaid_alert_display'
+        'pending_email_display', 'unpaid_alert_display',
     ]
     list_filter   = ['is_verified', 'is_active', 'account_frozen',
-                     'is_temporarily_disabled', 'contract_period']
+                     'is_temporarily_disabled', 'contract_period',
+                     'is_trial', 'trial_notified']
     search_fields = ['company_name', 'user__email', 'pending_email']
-    readonly_fields = ['created_at', 'validated_at', 'id', 'disabled_at', 'reactivated_at']
+    readonly_fields = ['created_at', 'validated_at', 'id',
+                       'disabled_at', 'reactivated_at',
+                       'trial_start', 'trial_end', 'trial_notified']
 
     actions = [
-        verify_partner, approve_email_change, reject_email_change,
+        verify_partner,
+        approve_email_change, reject_email_change,
         freeze_account, unfreeze_account,
+        send_terms_changed_email,
+        convert_trial_to_paid,
+        send_trial_expiry_email,
     ]
 
     fieldsets = (
@@ -108,6 +221,10 @@ class PartnerAdmin(admin.ModelAdmin):
         ('Contrat', {
             'fields': ('contract_period', 'payment_type', 'contract_start', 'contract_end')
         }),
+        ("Période d'essai", {
+            'fields': ('is_trial', 'trial_start', 'trial_end', 'trial_notified'),
+            'classes': ('collapse',),
+        }),
         ('Email en attente', {
             'fields': ('pending_email',),
             'classes': ('collapse',),
@@ -119,9 +236,19 @@ class PartnerAdmin(admin.ModelAdmin):
     )
 
     def get_email(self, obj):
-        # Affiche l'email du Partner en priorité, sinon celui du User lié
         return obj.email or (obj.user.email if obj.user else '—')
     get_email.short_description = "Email"
+
+    def trial_display(self, obj):
+        if not obj.is_trial:
+            return '—'
+        if obj.is_trial_expired:
+            return format_html('<span style="color:red">🔴 Trial expiré</span>')
+        if obj.trial_end:
+            days = (obj.trial_end - timezone.now().date()).days
+            return format_html('<span style="color:green">🟢 Trial — {} j restants</span>', days)
+        return format_html('<span style="color:blue">🔵 Trial</span>')
+    trial_display.short_description = "Trial"
 
     def status_display(self, obj):
         if obj.is_temporarily_disabled:
@@ -155,6 +282,7 @@ class PartnerAdmin(admin.ModelAdmin):
         return "—"
     unpaid_alert_display.short_description = "⚠️ Alerte impayé"
 
+
 # ── Admin Event ────────────────────────────────────────────────────────────────
 
 @admin.register(PartnerEvent)
@@ -164,6 +292,7 @@ class PartnerEventAdmin(admin.ModelAdmin):
     search_fields   = ['title', 'partner__company_name']
     readonly_fields = ['created_at', 'updated_at']
 
+
 # ── Admin Ad ───────────────────────────────────────────────────────────────────
 
 @admin.register(PartnerAd)
@@ -172,6 +301,7 @@ class PartnerAdAdmin(admin.ModelAdmin):
     list_filter     = ['status']
     search_fields   = ['title', 'partner__company_name']
     readonly_fields = ['created_at', 'total_price']
+
 
 # ── Autres ─────────────────────────────────────────────────────────────────────
 
@@ -183,3 +313,19 @@ class CouponAdmin(admin.ModelAdmin):
 admin.site.register(PartnerContract)
 admin.site.register(AdminNotification)
 admin.site.register(PartnerEventMedia)
+
+def activate_payment(modeladmin, request, queryset):
+    count = queryset.update(payment_status='active')
+    messages.success(request, f"{count} paiement(s) activé(s).")
+activate_payment.short_description = "💚 Activer le paiement"
+
+def deactivate_payment(modeladmin, request, queryset):
+    count = 0
+    for partner in queryset:
+        partner.payment_status = 'not_active'
+        partner.account_frozen = True
+        partner.save(update_fields=['payment_status', 'account_frozen'])
+        count += 1
+    messages.success(request, f"{count} paiement(s) désactivé(s) + compte(s) suspendu(s).")
+deactivate_payment.short_description = "🔴 Désactiver le paiement + suspendre"
+

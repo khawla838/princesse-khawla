@@ -13,7 +13,7 @@
           ← Retour aux publicités
         </a>
         <h1 class="text-2xl font-bold text-gray-900">Nouvelle Publicité</h1>
-        <p class="text-gray-500 mt-1">Tarif : <strong>5.000 TND / jour</strong> — Le prix est calculé automatiquement</p>
+        <p class="text-gray-500 mt-1">Tarif : <strong> {{ ad_price_per_day }} DT / jour</strong> — Le prix est calculé automatiquement</p>
       </div>
 
       <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
@@ -107,7 +107,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-purple-700 font-medium">Prix calculé</p>
-                <p class="text-xs text-purple-500 mt-0.5"><span id="price-days">0</span> jour(s) x 5.000 TND</p>
+                <p class="text-xs text-purple-500 mt-0.5"><span id="price-days">0</span> jour(s) x {{ ad_price_per_day|floatformat:"-3" }} TND</p>
               </div>
               <p class="text-2xl font-bold text-purple-700"><span id="price-total">0.000</span> TND</p>
             </div>
@@ -194,7 +194,7 @@
       const e    = new Date(end);
       const days = Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
       if (days >= 1) {
-        const total = (days * 5).toFixed(3);
+        const total = (days * {{ ad_price_per_day }}).toFixed(3);
         document.getElementById('price-days').textContent  = days;
         document.getElementById('price-total').textContent = total;
         box.classList.remove('hidden');
