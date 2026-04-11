@@ -9,9 +9,9 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.utils import timezone
+from django.core.files.base import ContentFile  # ← AJOUT
 from xhtml2pdf import pisa
 
-# Configuration taxes
 TVA_RATE = Decimal('0.19')
 TIMBRE = Decimal('1.000')
 
@@ -25,12 +25,7 @@ COMPANY = {
 }
 
 def fetch_resources(uri, rel):
-    """
-    Convertit les URIs static et media en chemins absolus pour xhtml2pdf.
-    Nécessaire pour afficher le logo dans le PDF.
-    """
     if uri.startswith(settings.STATIC_URL):
-        # Enlève /static/ et cherche dans le dossier static à la racine
         relative_path = uri.replace(settings.STATIC_URL, "")
         path = os.path.join(settings.BASE_DIR, 'static', relative_path)
     elif uri.startswith(settings.MEDIA_URL):
@@ -38,39 +33,28 @@ def fetch_resources(uri, rel):
         path = os.path.join(settings.MEDIA_ROOT, relative_path)
     else:
         path = uri
-
-    # Vérification de sécurité pour le debug
     if not os.path.isfile(path):
         print(f"--- ERREUR PDF : Fichier introuvable : {path} ---")
-        
     return path
 
 def generate_pdf(html):
-    """Génère le binaire PDF à partir du HTML."""
     buffer = BytesIO()
-    # Utilisation du link_callback pour résoudre les chemins des images (logo)
     pisa_status = pisa.CreatePDF(html, dest=buffer, link_callback=fetch_resources)
-    
     if pisa_status.err:
         print("--- ERREUR lors de la génération du PDF ---")
-        
     buffer.seek(0)
     return buffer.read()
 
 def _generate_client_code(payment_ref: str) -> str:
-    """Génère un code client basé sur la réf de paiement ou aléatoire."""
     if payment_ref and len(payment_ref) >= 8:
         return f"CL-{payment_ref[:8].upper()}"
     chars = string.ascii_uppercase + string.digits
     return f"CL-{''.join(secrets.choice(chars) for _ in range(8))}"
 
 def _compute_amounts(amount_str: str):
-    """Calcule HT, TVA, Timbre, TTC avec précision monétaire (3 décimales)."""
     ht = Decimal(str(amount_str)).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
     tva = (ht * TVA_RATE).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
-    # TTC = HT + TVA + Timbre Fiscal
     ttc = (ht + tva + TIMBRE).quantize(Decimal('0.001'), rounding=ROUND_HALF_UP)
-    
     return {
         'amount_ht': f"{ht:.3f}",
         'tva_amount': f"{tva:.3f}",
@@ -78,7 +62,6 @@ def _compute_amounts(amount_str: str):
     }
 
 def send_receipt(partner, payment_type: str, details: dict, payment_ref: str = ''):
-    """Prépare les données, génère le PDF et envoie l'email au partenaire."""
     from partners.models import Receipt as ReceiptCounter, ReceiptHistory
 
     receipt_number = ReceiptCounter.next()
@@ -102,11 +85,11 @@ def send_receipt(partner, payment_type: str, details: dict, payment_ref: str = '
 
     # 1. Rendu HTML
     html = render_to_string('partners/receipt.html', context)
-    
+
     # 2. Conversion en PDF
     pdf = generate_pdf(html)
 
-    # 3. Envoi de l'email
+    # 3. Envoi email
     subject = f"Reçu N°{receipt_number} — {details.get('label', 'Dacnis')}"
     email = EmailMessage(
         subject=subject,
@@ -114,14 +97,13 @@ def send_receipt(partner, payment_type: str, details: dict, payment_ref: str = '
         from_email=settings.DEFAULT_FROM_EMAIL,
         to=[partner.email],
     )
-    
     filename = f"recu_{receipt_number}_{now.strftime('%Y%m%d')}.pdf"
     email.attach(filename, pdf, 'application/pdf')
     email.send(fail_silently=True)
 
-    # 4. Historique en base de données
+    # 4. Historique en base de données + sauvegarde PDF  ← CORRECTION ICI
     try:
-        ReceiptHistory.objects.create(
+        history = ReceiptHistory.objects.create(
             partner=partner,
             receipt_number=receipt_number,
             payment_type=payment_type,
@@ -132,5 +114,8 @@ def send_receipt(partner, payment_type: str, details: dict, payment_ref: str = '
             details=details,
             sent_to_email=partner.email,
         )
+        # Sauvegarde du PDF dans le champ pdf_file
+        history.pdf_file.save(filename, ContentFile(pdf), save=True)
+
     except Exception as e:
         print(f"Erreur sauvegarde historique : {e}")

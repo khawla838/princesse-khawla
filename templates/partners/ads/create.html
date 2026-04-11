@@ -2,172 +2,204 @@
 {% block title %}Nouvelle Publicité{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex">
-  {% include 'partners/sidebar.html' %}
+<!-- Flatpickr -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" id="fp-dark-theme" disabled>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/fr.js"></script>
 
-  <main class="ml-64 flex-1 p-8">
-    <div class="max-w-2xl mx-auto">
+  <div class="mb-6">
+    <a href="{% url 'partners:ad_list' %}" class="text-sm text-gray-400 hover:text-gray-300 flex items-center gap-1 mb-3">
+      ← Retour aux publicités
+    </a>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Nouvelle Publicité</h1>
+    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Tarif : <strong>{{ ad_price_per_day }} DT / jour</strong> — Prix calculé automatiquement</p>
+  </div>
 
-      <div class="mb-8">
-        <a href="{% url 'partners:ad_list' %}" class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1 mb-4">
-          ← Retour aux publicités
+  <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+    <form method="post" enctype="multipart/form-data" class="space-y-5" id="adForm">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-400 px-4 py-3 rounded-xl text-sm">
+        {{ form.non_field_errors.0 }}
+      </div>
+      {% endif %}
+
+      <!-- Nom -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Nom de la publicité</label>
+        {{ form.title }}
+        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Laissez vide pour un nom auto-généré (ADS-XXXXXX).</p>
+        {% if form.title.errors %}<p class="mt-1 text-xs text-red-500">{{ form.title.errors.0 }}</p>{% endif %}
+      </div>
+
+      <!-- Image Mobile -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+          Image Mobile (320×50) <span class="text-red-500">*</span>
+        </label>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">GIF, PNG, JPG — max 5MB</p>
+        <div id="mobile-drop-zone"
+             class="border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-xl p-5 text-center hover:border-purple-400 dark:hover:border-purple-400 transition cursor-pointer bg-gray-50 dark:bg-gray-700/50"
+             onclick="document.getElementById('mobileImageInput').click()">
+          <div id="mobile-preview-container">
+            <div class="text-2xl mb-1">🖼</div>
+            <p class="text-sm text-gray-500 dark:text-gray-300">Cliquez pour sélectionner</p>
+          </div>
+          <img id="mobile-preview" class="hidden mx-auto max-h-32 rounded-xl mt-2 object-contain" />
+          <input id="mobileImageInput" type="file" name="mobile_image" accept=".jpg,.jpeg,.png,.gif"
+                 class="hidden"
+                 onchange="handleImage(this, 'mobile-preview', 'mobile-preview-container', 'mobile-drop-zone', 'mobile-error', 320, 50)">
+        </div>
+        <p id="mobile-error" class="hidden mt-1 text-xs text-red-500"></p>
+        {% if form.mobile_image.errors %}<p class="mt-1 text-xs text-red-500">{{ form.mobile_image.errors.0 }}</p>{% endif %}
+      </div>
+
+      <!-- Image Tablette -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
+          Image Tablette (728×90) <span class="text-red-500">*</span>
+        </label>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">GIF, PNG, JPG — max 5MB</p>
+        <div id="tablet-drop-zone"
+             class="border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-xl p-5 text-center hover:border-purple-400 dark:hover:border-purple-400 transition cursor-pointer bg-gray-50 dark:bg-gray-700/50"
+             onclick="document.getElementById('tabletImageInput').click()">
+          <div id="tablet-preview-container">
+            <div class="text-2xl mb-1">🖼</div>
+            <p class="text-sm text-gray-500 dark:text-gray-300">Cliquez pour sélectionner</p>
+          </div>
+          <img id="tablet-preview" class="hidden mx-auto max-h-32 rounded-xl mt-2 object-contain" />
+          <input id="tabletImageInput" type="file" name="tablet_image" accept=".jpg,.jpeg,.png,.gif"
+                 class="hidden"
+                 onchange="handleImage(this, 'tablet-preview', 'tablet-preview-container', 'tablet-drop-zone', 'tablet-error', 728, 90)">
+        </div>
+        <p id="tablet-error" class="hidden mt-1 text-xs text-red-500"></p>
+        {% if form.tablet_image.errors %}<p class="mt-1 text-xs text-red-500">{{ form.tablet_image.errors.0 }}</p>{% endif %}
+      </div>
+
+      <!-- Lien -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
+          Lien de destination <span class="text-red-500">*</span>
+        </label>
+        {{ form.destination_link }}
+        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">URL vers laquelle redirige la publicité.</p>
+        {% if form.destination_link.errors %}<p class="mt-1 text-xs text-red-500">{{ form.destination_link.errors.0 }}</p>{% endif %}
+      </div>
+
+      <!-- Dates -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Date de début <span class="text-red-500">*</span></label>
+          {{ form.start_date }}
+          {% if form.start_date.errors %}<p class="mt-1 text-xs text-red-500">{{ form.start_date.errors.0 }}</p>{% endif %}
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Date de fin <span class="text-red-500">*</span></label>
+          {{ form.end_date }}
+          {% if form.end_date.errors %}<p class="mt-1 text-xs text-red-500">{{ form.end_date.errors.0 }}</p>{% endif %}
+        </div>
+      </div>
+
+      <!-- Prix calculé -->
+      <div id="price-box" class="hidden bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded-xl p-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm text-purple-700 dark:text-purple-300 font-medium">Prix calculé</p>
+            <p class="text-xs text-purple-500 dark:text-purple-400 mt-0.5"><span id="price-days">0</span> jour(s) × {{ ad_price_per_day|floatformat:"-3" }} TND</p>
+          </div>
+          <p class="text-xl font-bold text-purple-700 dark:text-purple-300"><span id="price-total">0.000</span> TND</p>
+        </div>
+      </div>
+
+      <!-- Boutons -->
+      <div class="flex flex-col sm:flex-row gap-3 pt-1">
+        <button type="submit"
+          class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md text-sm">
+          Continuer vers confirmation →
+        </button>
+        <a href="{% url 'partners:ad_list' %}"
+           class="px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium text-sm text-center">
+          Annuler
         </a>
-        <h1 class="text-2xl font-bold text-gray-900">Nouvelle Publicité</h1>
-        <p class="text-gray-500 mt-1">Tarif : <strong> {{ ad_price_per_day }} DT / jour</strong> — Le prix est calculé automatiquement</p>
       </div>
+    </form>
+  </div>
 
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-        <form method="post" enctype="multipart/form-data" class="space-y-6" id="adForm">
-          {% csrf_token %}
+{% block extrascript %}
+<style>
+  /* ── Flatpickr responsive ── */
+  .flatpickr-calendar {
+    max-width: 100% !important;
+    width: min(340px, 96vw) !important;
+    font-size: 0.9rem !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 12px 32px rgba(0,0,0,.3) !important;
+  }
+  .flatpickr-day { border-radius: 0.5rem !important; }
+  .flatpickr-day.selected { background: #7c3aed !important; border-color: #7c3aed !important; }
+  .flatpickr-input { cursor: pointer; }
 
-          {% if form.non_field_errors %}
-          <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
-            {{ form.non_field_errors.0 }}
-          </div>
-          {% endif %}
+  /* ── Inputs en mode sombre ── */
+  .dark #adForm input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="hidden"]),
+  .dark #adForm textarea {
+    background-color: #1a2840 !important;
+    color: #dce9f5 !important;
+    border-color: #2a3d55 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  .dark #adForm input::placeholder,
+  .dark #adForm textarea::placeholder { color: #4e6a88 !important; opacity: 1 !important; }
+  .dark #adForm input:focus,
+  .dark #adForm textarea:focus {
+    background-color: #1e2f4a !important;
+    border-color: #7c3aed !important;
+    box-shadow: 0 0 0 3px rgba(124,58,237,.2) !important;
+    outline: none !important;
+  }
+  .dark #adForm input[type="date"] { color-scheme: dark; }
 
-          <!-- Ad Name -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Ad Name</label>
-            {{ form.title }}
-            <p class="mt-1 text-xs text-gray-400">If empty, a name like 'ADS-XXXXXX' will be auto-generated.</p>
-            {% if form.title.errors %}<p class="mt-1 text-xs text-red-500">{{ form.title.errors.0 }}</p>{% endif %}
-          </div>
-
-          <!-- Mobile Image (320x50) -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Mobile Image (320x50) <span class="text-red-500">*</span>
-            </label>
-            <p class="text-xs text-gray-400 mb-2">Required size: 320x50 pixels — GIF, PNG, JPG — max 5MB</p>
-            <div id="mobile-drop-zone"
-                 class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-purple-400 transition cursor-pointer"
-                 onclick="document.getElementById('mobileImageInput').click()">
-              <div id="mobile-preview-container">
-                <div class="text-3xl mb-2">🖼</div>
-                <p class="text-sm text-gray-500">Cliquez pour sélectionner une image mobile</p>
-              </div>
-              <img id="mobile-preview" class="hidden mx-auto max-h-40 rounded-xl mt-3 object-contain" />
-              <input id="mobileImageInput" type="file" name="mobile_image" accept=".jpg,.jpeg,.png,.gif"
-                     class="hidden"
-                     onchange="handleImage(this, 'mobile-preview', 'mobile-preview-container', 'mobile-drop-zone', 'mobile-error', 320, 50)">
-            </div>
-            <p id="mobile-error" class="hidden mt-1 text-xs text-red-500"></p>
-            {% if form.mobile_image.errors %}<p class="mt-1 text-xs text-red-500">{{ form.mobile_image.errors.0 }}</p>{% endif %}
-          </div>
-
-          <!-- Tablet Image (728x90) -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">
-              Tablet Image (728x90) <span class="text-red-500">*</span>
-            </label>
-            <p class="text-xs text-gray-400 mb-2">Required size: 728x90 pixels — GIF, PNG, JPG — max 5MB</p>
-            <div id="tablet-drop-zone"
-                 class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-purple-400 transition cursor-pointer"
-                 onclick="document.getElementById('tabletImageInput').click()">
-              <div id="tablet-preview-container">
-                <div class="text-3xl mb-2">🖼</div>
-                <p class="text-sm text-gray-500">Cliquez pour sélectionner une image tablet</p>
-              </div>
-              <img id="tablet-preview" class="hidden mx-auto max-h-40 rounded-xl mt-3 object-contain" />
-              <input id="tabletImageInput" type="file" name="tablet_image" accept=".jpg,.jpeg,.png,.gif"
-                     class="hidden"
-                     onchange="handleImage(this, 'tablet-preview', 'tablet-preview-container', 'tablet-drop-zone', 'tablet-error', 728, 90)">
-            </div>
-            <p id="tablet-error" class="hidden mt-1 text-xs text-red-500"></p>
-            {% if form.tablet_image.errors %}<p class="mt-1 text-xs text-red-500">{{ form.tablet_image.errors.0 }}</p>{% endif %}
-          </div>
-
-          <!-- Destination Link -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              Destination Link <span class="text-red-500">*</span>
-            </label>
-            {{ form.destination_link }}
-            <p class="mt-1 text-xs text-gray-400">The destination URL for this ad. This will be tracked via Short.io.</p>
-            {% if form.destination_link.errors %}<p class="mt-1 text-xs text-red-500">{{ form.destination_link.errors.0 }}</p>{% endif %}
-          </div>
-
-          <!-- Dates -->
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Date de début *</label>
-              {{ form.start_date }}
-              {% if form.start_date.errors %}<p class="mt-1 text-xs text-red-500">{{ form.start_date.errors.0 }}</p>{% endif %}
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-2">Date de fin *</label>
-              {{ form.end_date }}
-              {% if form.end_date.errors %}<p class="mt-1 text-xs text-red-500">{{ form.end_date.errors.0 }}</p>{% endif %}
-            </div>
-          </div>
-
-          <!-- Prix calculé dynamiquement -->
-          <div id="price-box" class="hidden bg-purple-50 border border-purple-200 rounded-xl p-4">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-purple-700 font-medium">Prix calculé</p>
-                <p class="text-xs text-purple-500 mt-0.5"><span id="price-days">0</span> jour(s) x {{ ad_price_per_day|floatformat:"-3" }} TND</p>
-              </div>
-              <p class="text-2xl font-bold text-purple-700"><span id="price-total">0.000</span> TND</p>
-            </div>
-          </div>
-
-          <div class="flex gap-3">
-            <button type="submit"
-              class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md">
-              Continuer vers confirmation ->
-            </button>
-            <a href="{% url 'partners:ad_list' %}"
-               class="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition font-medium">
-              Annuler
-            </a>
-          </div>
-        </form>
-      </div>
-    </div>
-  </main>
-</div>
-
+  /* ── Inputs width fix (tous modes) ── */
+  #adForm input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="hidden"]),
+  #adForm textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+  #adForm .grid > div { min-width: 0; }
+</style>
 <script>
-  // ── Validation dimensions + apercu ─────────────────────────────────────────
   function handleImage(input, previewId, containerId, dropZoneId, errorId, reqW, reqH) {
     const file      = input.files && input.files[0];
     const errorEl   = document.getElementById(errorId);
     const preview   = document.getElementById(previewId);
     const container = document.getElementById(containerId);
     const dropZone  = document.getElementById(dropZoneId);
-
-    // Reset etat visuel
     errorEl.classList.add('hidden');
     errorEl.textContent = '';
     dropZone.classList.remove('border-red-400', 'border-green-400');
-    dropZone.classList.add('border-gray-200');
-
+    dropZone.classList.add('border-gray-300');
     if (!file) return;
-
-    // Verification taille fichier (5MB max)
     if (file.size > 5 * 1024 * 1024) {
       showImgError(input, errorEl, dropZone, 'Fichier trop lourd. Maximum 5MB.');
       return;
     }
-
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = new Image();
       img.onload = function() {
-        // Verification dimensions exactes
         if (img.width !== reqW || img.height !== reqH) {
           showImgError(input, errorEl, dropZone,
-            'Dimensions incorrectes : ' + img.width + 'x' + img.height + 'px detectes. '
-            + 'Requis : ' + reqW + 'x' + reqH + 'px.');
+            'Dimensions incorrectes : ' + img.width + 'x' + img.height + 'px. Requis : ' + reqW + 'x' + reqH + 'px.');
           return;
         }
-        // Image valide : afficher apercu + bordure verte
         preview.src = e.target.result;
         preview.classList.remove('hidden');
         container.classList.add('hidden');
-        dropZone.classList.remove('border-gray-200', 'border-red-400');
+        dropZone.classList.remove('border-gray-300', 'border-red-400');
         dropZone.classList.add('border-green-400');
       };
       img.src = e.target.result;
@@ -176,27 +208,26 @@
   }
 
   function showImgError(input, errorEl, dropZone, msg) {
-    input.value = '';  // vide l'input pour bloquer le submit avec une mauvaise image
+    input.value = '';
     errorEl.textContent = msg;
     errorEl.classList.remove('hidden');
-    dropZone.classList.remove('border-gray-200', 'border-green-400');
+    dropZone.classList.remove('border-gray-300', 'border-green-400');
     dropZone.classList.add('border-red-400');
   }
 
-  // ── Calcul prix ────────────────────────────────────────────────────────────
   function calcPrice() {
-    const start = document.querySelector('[name="start_date"]').value;
-    const end   = document.querySelector('[name="end_date"]').value;
-    const box   = document.getElementById('price-box');
-
-    if (start && end) {
-      const s    = new Date(start);
-      const e    = new Date(end);
-      const days = Math.round((e - s) / (1000 * 60 * 60 * 24)) + 1;
+    const start = document.querySelector('[name="start_date"]')._flatpickr
+      ? document.querySelector('[name="start_date"]')._flatpickr.selectedDates[0]
+      : new Date(document.querySelector('[name="start_date"]').value);
+    const end = document.querySelector('[name="end_date"]')._flatpickr
+      ? document.querySelector('[name="end_date"]')._flatpickr.selectedDates[0]
+      : new Date(document.querySelector('[name="end_date"]').value);
+    const box = document.getElementById('price-box');
+    if (start && end && !isNaN(start) && !isNaN(end)) {
+      const days = Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
       if (days >= 1) {
-        const total = (days * {{ ad_price_per_day }}).toFixed(3);
         document.getElementById('price-days').textContent  = days;
-        document.getElementById('price-total').textContent = total;
+        document.getElementById('price-total').textContent = (days * {{ ad_price_per_day }}).toFixed(3);
         box.classList.remove('hidden');
         return;
       }
@@ -204,18 +235,42 @@
     box.classList.add('hidden');
   }
 
-  // ── Dates min = demain ─────────────────────────────────────────────────────
+  /* ── Flatpickr Init ── */
+  const isDark = () => document.documentElement.classList.contains('dark');
+  function applyFpTheme() {
+    document.getElementById('fp-dark-theme').disabled = !isDark();
+  }
+  applyFpTheme();
+  new MutationObserver(applyFpTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const tStr = tomorrow.toISOString().split('T')[0];
-  document.querySelector('[name="start_date"]').min = tStr;
-  document.querySelector('[name="end_date"]').min   = tStr;
 
-  document.querySelector('[name="start_date"]').addEventListener('change', function() {
-    document.querySelector('[name="end_date"]').min = this.value;
-    calcPrice();
+  const fpStart = flatpickr('[name="start_date"]', {
+    locale: 'fr',
+    dateFormat: 'Y-m-d',
+    altInput: true,
+    altFormat: 'd/m/Y',
+    minDate: tomorrow,
+    disableMobile: false,
+    onChange: function(selectedDates) {
+      if (selectedDates[0]) fpEnd.set('minDate', selectedDates[0]);
+      calcPrice();
+    }
   });
-  document.querySelector('[name="end_date"]').addEventListener('change', calcPrice);
+
+  const fpEnd = flatpickr('[name="end_date"]', {
+    locale: 'fr',
+    dateFormat: 'Y-m-d',
+    altInput: true,
+    altFormat: 'd/m/Y',
+    minDate: tomorrow,
+    disableMobile: false,
+    onChange: calcPrice
+  });
+
   calcPrice();
 </script>
+{% endblock %}
+
 {% endblock %}

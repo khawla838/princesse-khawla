@@ -2,59 +2,51 @@
 {% block title %}Confirmer la publicité{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex">
-  {% include 'partners/sidebar.html' %}
-
-  <main class="ml-64 flex-1 p-8">
     <div class="max-w-xl mx-auto">
 
       <div class="mb-8">
-        <a href="{% url 'partners:ad_list' %}" class="text-sm text-gray-400 hover:text-gray-600 flex items-center gap-1 mb-4">
+        <a href="{% url 'partners:ad_list' %}" class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex items-center gap-1 mb-4">
           ← Retour aux publicités
         </a>
-        <h1 class="text-2xl font-bold text-gray-900">Confirmer votre publicité</h1>
-        <p class="text-gray-500 mt-1">Vérifiez les détails avant de procéder au paiement</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Confirmer votre publicité</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Vérifiez les détails avant de procéder au paiement</p>
       </div>
 
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 space-y-6">
+      <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-8 space-y-6">
 
-        <!-- Aperçu image -->
         {% if ad.image %}
         <div class="flex justify-center">
-          <img src="{{ ad.image.url }}" class="max-h-48 rounded-xl object-cover border border-gray-100 shadow-sm" />
+          <img src="{{ ad.image.url }}" class="max-h-48 rounded-xl object-cover border border-gray-100 dark:border-gray-700 shadow-sm" />
         </div>
         {% endif %}
 
-        <!-- Détails -->
         <div class="space-y-3">
-          <div class="flex justify-between py-3 border-b border-gray-100">
-            <span class="text-sm text-gray-500">Titre</span>
-            <span class="text-sm font-semibold text-gray-900">{{ ad.title }}</span>
+          <div class="flex justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Titre</span>
+            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ ad.title }}</span>
           </div>
-          <div class="flex justify-between py-3 border-b border-gray-100">
-            <span class="text-sm text-gray-500">Période</span>
-            <span class="text-sm font-medium text-gray-800">{{ ad.start_date|date:"d M Y" }} → {{ ad.end_date|date:"d M Y" }}</span>
+          <div class="flex justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Période</span>
+            <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ ad.start_date|date:"d M Y" }} → {{ ad.end_date|date:"d M Y" }}</span>
           </div>
-          <div class="flex justify-between py-3 border-b border-gray-100">
-            <span class="text-sm text-gray-500">Durée</span>
-            <span class="text-sm font-medium text-gray-800">{{ ad.nb_days }} jour(s)</span>
+          <div class="flex justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Durée</span>
+            <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ ad.nb_days }} jour(s)</span>
           </div>
-          <div class="flex justify-between py-3 border-b border-gray-100">
-            <span class="text-sm text-gray-500">Tarif</span>
-            <span class="text-sm font-medium text-gray-800">{{ ad_price_per_day|floatformat:"-3" }} TND / jour</span>
+          <div class="flex justify-between py-3 border-b border-gray-100 dark:border-gray-700">
+            <span class="text-sm text-gray-500 dark:text-gray-400">Tarif</span>
+            <span class="text-sm font-medium text-gray-800 dark:text-gray-200">{{ ad_price_per_day|floatformat:"-3" }} TND / jour</span>
           </div>
           <div class="flex justify-between py-3">
-            <span class="text-sm font-bold text-gray-900">Total à payer</span>
-            <span class="text-xl font-bold text-purple-600">{{ ad.total_price|floatformat:"-3" }} TND</span>
+            <span class="text-sm font-bold text-gray-900 dark:text-white">Total à payer</span>
+            <span class="text-xl font-bold text-purple-600 dark:text-purple-400">{{ ad.total_price|floatformat:"-3" }} TND</span>
           </div>
         </div>
 
-        <!-- Avertissement -->
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-700">
+        <div class="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl p-4 text-sm text-amber-700 dark:text-amber-400">
           ⚠️ Après confirmation, la publicité ne pourra plus être modifiée ni supprimée.
         </div>
 
-        <!-- Actions -->
         <div class="flex gap-3">
           <form method="post" class="flex-1">
             {% csrf_token %}
@@ -64,13 +56,11 @@
             </button>
           </form>
           <a href="{% url 'partners:ad_list' %}"
-             class="px-6 py-3 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 transition font-medium">
+             class="px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium">
             Annuler
           </a>
         </div>
 
       </div>
     </div>
-  </main>
-</div>
 {% endblock %}

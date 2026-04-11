@@ -1,83 +1,53 @@
 {% extends 'partners/base.html' %}
-{% block title %}Dashboard — {{ partner.company_name }}{% endblock %}
+{% load i18n %}
+
+{% block title %}{% trans "Tableau de bord" %} — {{ partner.company_name }}{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex">
+<div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Bonjour, {{ partner.company_name }} </h1>
+    <p class="text-gray-500 dark:text-gray-400 mt-1">Voici un aperçu de votre activité</p>
+</div>
 
-    {% include 'partners/sidebar.html' %}
+{% if partner.account_frozen %}
+<div class="mb-6 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-800 rounded-2xl p-5 flex items-start gap-4">
+    <div class="w-10 h-10 bg-red-100 dark:bg-red-800 rounded-xl flex items-center justify-center flex-shrink-0 text-xl">⚠️</div>
+    <div>
+        <h3 class="font-semibold text-red-800 dark:text-red-300">Compte suspendu</h3>
+        <p class="text-red-600 dark:text-red-400 text-sm mt-1">Votre compte est suspendu pour non-paiement.</p>
+        <a href="{% url 'partners:subscription' %}" class="mt-3 inline-block bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-700 transition">
+            Renouveler maintenant
+        </a>
+    </div>
+</div>
+{% endif %}
 
-    <main class="ml-64 flex-1 p-8">
-
-        <div class="mb-8">
-            <h1 class="text-2xl font-bold text-gray-900">Bonjour, {{ partner.company_name }} 👋</h1>
-            <p class="text-gray-500 mt-1">Voici un aperçu de votre activité</p>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Contrat</p>
+            <span class="w-9 h-9 rounded-xl flex items-center justify-center bg-green-100 dark:bg-green-900/30">✅</span>
         </div>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">{% if contract_active %}Actif{% else %}Inactif{% endif %}</p>
+        <p class="text-xs text-gray-400 mt-1">Expire le {{ partner.contract_end|date:"d M Y" }}</p>
+    </div>
 
-        {% if partner.account_frozen %}
-        <div class="mb-6 bg-red-50 border border-red-200 rounded-2xl p-5 flex items-start gap-4">
-            <div class="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">⚠️</div>
-            <div>
-                <h3 class="font-semibold text-red-800">Compte suspendu</h3>
-                <p class="text-red-600 text-sm mt-1">Votre compte est suspendu pour non-paiement. Renouvelez votre abonnement.</p>
-                <a href="{% url 'partners:subscription' %}" class="mt-3 inline-block bg-red-600 text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-red-700 transition">
-                    Renouveler maintenant
-                </a>
-            </div>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Événements</p>
+            <span class="w-9 h-9 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center text-lg">📅</span>
         </div>
-        {% endif %}
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ events_count }}</p>
+        <p class="text-xs text-gray-400 mt-1">Événements publiés</p>
+    </div>
 
-        {% if days_until_expiry is not None and days_until_expiry <= 7 and not partner.account_frozen %}
-        <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4">
-            <div class="w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">⏰</div>
-            <div>
-                <h3 class="font-semibold text-amber-800">Abonnement expire bientôt</h3>
-                <p class="text-amber-700 text-sm mt-1">
-                    Votre abonnement expire dans <strong>{{ days_until_expiry }} jour(s)</strong> ({{ partner.contract_end }}).
-                </p>
-            </div>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-5 hover:shadow-md transition">
+        <div class="flex items-center justify-between mb-4">
+            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Publicités</p>
+            <span class="w-9 h-9 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center text-lg">🖼</span>
         </div>
-        {% endif %}
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
-
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <div class="flex items-center justify-between mb-4">
-                    <p class="text-sm font-medium text-gray-500">Contrat</p>
-                    <span class="w-9 h-9 rounded-xl flex items-center justify-center {% if contract_active %}bg-green-100{% else %}bg-gray-100{% endif %}">
-                        ✅
-                    </span>
-                </div>
-                <p class="text-2xl font-bold text-gray-900">{% if contract_active %}Actif{% else %}Inactif{% endif %}</p>
-                <p class="text-xs text-gray-400 mt-1">
-                    {% if partner.contract_end %}Expire le {{ partner.contract_end|date:"d M Y" }}{% else %}Aucun contrat actif{% endif %}
-                </p>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <div class="flex items-center justify-between mb-4">
-                    <p class="text-sm font-medium text-gray-500">Événements</p>
-                    <span class="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center">📅</span>
-                </div>
-                <p class="text-2xl font-bold text-gray-900">{{ events_count }}</p>
-                <p class="text-xs text-gray-400 mt-1">Événements publiés</p>
-            </div>
-
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-                <div class="flex items-center justify-between mb-4">
-                    <p class="text-sm font-medium text-gray-500">Publicités</p>
-                    <span class="w-9 h-9 bg-purple-100 rounded-xl flex items-center justify-center">🖼</span>
-                </div>
-                <p class="text-2xl font-bold text-gray-900">{{ ads_count }}</p>
-                <p class="text-xs text-gray-400 mt-1">Annonces actives</p>
-            </div>
-        </div>
-
-        {% if not partner.is_verified %}
-        <div class="bg-blue-50 border border-blue-200 rounded-2xl p-5 text-sm text-blue-700">
-            ⏳ Votre compte est en attente de validation par l'administrateur FielMedina.
-        </div>
-        {% endif %}
-
-    </main>
+        <p class="text-2xl font-bold text-gray-900 dark:text-white">{{ ads_count }}</p>
+        <p class="text-xs text-gray-400 mt-1">Annonces actives</p>
+    </div>
 </div>
 {% endblock %}

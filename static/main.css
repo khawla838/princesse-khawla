@@ -4752,3 +4752,77 @@
     }
   }
 }
+
+/* ============================================================
+   FIELMEDINA — Dark Mode: Inputs / Selects / Textareas
+   Appliqué directement (sans dépendre de la classe .dark)
+   ============================================================ */
+
+/* --- Variables sémantiques dark (avec et sans classe .dark) --- */
+.dark,
+html.dark,
+body.dark,
+[data-theme="dark"],
+[data-bs-theme="dark"] {
+  --color-body: #8eacc4;
+  --color-heading: #dce9f5;
+  --color-neutral-primary-soft: #1a2840;
+  --color-neutral-primary: #1a2840;
+  --color-neutral-primary-medium: #1a2840;
+  --color-neutral-secondary-soft: #141f30;
+  --color-neutral-secondary: #141f30;
+  --color-neutral-secondary-medium: #141f30;
+  --color-neutral-tertiary-soft: #0f1825;
+  --color-neutral-tertiary: #0f1825;
+  --color-neutral-tertiary-medium: #0f1825;
+  --color-neutral-quaternary: #2a3d55;
+  --color-default: #2a3d55;
+  --color-default-medium: #2a3d55;
+  --color-light: #2a3d55;
+  --color-dark: #c8ddf0;
+  --color-dark-strong: #dce9f5;
+}
+
+/* --- Inputs / Selects / Textareas sans condition de classe --- */
+/* Ciblage direct, haute spécificité, couvre tous les cas */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="range"]),
+select,
+textarea {
+  background-color: #1a2840 !important;
+  color: #dce9f5 !important;
+  border-color: #2a3d55 !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"])::placeholder,
+textarea::placeholder {
+  color: #4e6a88 !important;
+  opacity: 1 !important;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+select:focus,
+textarea:focus {
+  background-color: #1e2f4a !important;
+  border-color: #3b82f6 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+}
+
+/* Options dans les selects natifs */
+select option {
+  background-color: #1a2840;
+  color: #dce9f5;
+}
+
+/* Inputs date/time */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+/* Icône calendrier visible sur fond sombre */
+::-webkit-calendar-picker-indicator {
+  filter: invert(0.7) sepia(0.3) saturate(0.5) hue-rotate(180deg);
+  cursor: pointer;
+}

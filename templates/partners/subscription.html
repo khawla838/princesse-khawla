@@ -2,210 +2,219 @@
 {% block title %}Mon Abonnement{% endblock %}
 
 {% block content %}
-<div class="min-h-screen flex">
-  {% include 'partners/sidebar.html' %}
+<div class="max-w-3xl mx-auto">
 
-  <main class="ml-64 flex-1 p-8">
-    <div class="max-w-3xl mx-auto">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Mon Abonnement</h1>
+    <p class="text-gray-500 dark:text-gray-400 mt-1">Choisissez votre formule et procédez au paiement</p>
+  </div>
 
-      <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Mon Abonnement</h1>
-        <p class="text-gray-500 mt-1">Choisissez votre formule et procédez au paiement</p>
+  <!-- Statut actuel -->
+  {% if partner.contract_end %}
+  <div class="mb-6 rounded-2xl border p-5
+    {% if contract_active %}bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800
+    {% else %}bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800{% endif %}">
+    <div class="flex items-center justify-between flex-wrap gap-2">
+      <div>
+        <p class="font-semibold {% if contract_active %}text-green-800 dark:text-green-300{% else %}text-red-800 dark:text-red-300{% endif %}">
+          {% if contract_active %}✅ Abonnement actif{% else %}❌ Abonnement expiré{% endif %}
+        </p>
+        <p class="text-sm mt-1 {% if contract_active %}text-green-600 dark:text-green-400{% else %}text-red-600 dark:text-red-400{% endif %}">
+          Expire le {{ partner.contract_end|date:"d M Y" }}
+          {% if days_until_expiry is not None %}
+            — {% if days_until_expiry > 0 %}dans {{ days_until_expiry }} jour(s){% else %}expiré{% endif %}
+          {% endif %}
+        </p>
       </div>
-
-      <!-- Statut actuel -->
-      {% if partner.contract_end %}
-      <div class="mb-6 rounded-2xl border p-5
-        {% if contract_active %}bg-green-50 border-green-200{% else %}bg-red-50 border-red-200{% endif %}">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="font-semibold {% if contract_active %}text-green-800{% else %}text-red-800{% endif %}">
-              {% if contract_active %}✅ Abonnement actif{% else %}❌ Abonnement expiré{% endif %}
-            </p>
-            <p class="text-sm mt-1 {% if contract_active %}text-green-600{% else %}text-red-600{% endif %}">
-              Expire le {{ partner.contract_end|date:"d M Y" }}
-              {% if days_until_expiry is not None %}
-                — {% if days_until_expiry > 0 %}dans {{ days_until_expiry }} jour(s){% else %}expiré{% endif %}
-              {% endif %}
-            </p>
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      <!-- 3 Catégories de packages -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-
-        <!-- CAT 1 : Abonnement durée -->
-        <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-5">
-          <h3 class="font-bold text-blue-800 mb-1">📦 Package Abonnement</h3>
-          <p class="text-xs text-blue-600 mb-3">Accès complet à la plateforme</p>
-          <ul class="text-sm text-blue-700 space-y-1">
-            <li>• 1 Mois — <strong>10 TND</strong></li>
-            <li>• 3 Mois — <strong>25 TND</strong></li>
-            <li>• 6 Mois — <strong>50 TND</strong></li>
-            <li>• 10 Mois — <strong>80 TND</strong></li>
-            <li>• 1 An — <strong>100 TND</strong></li>
-          </ul>
-        </div>
-
-        <!-- CAT 2 : Boost événement -->
-        <div class="bg-orange-50 border-2 border-orange-200 rounded-2xl p-5">
-          <h3 class="font-bold text-orange-800 mb-1">🚀 Package Boost Événement</h3>
-          <p class="text-xs text-orange-600 mb-3">Mise en avant de vos événements</p>
-          <ul class="text-sm text-orange-700 space-y-1">
-            <li>• Prix : <strong>{{ boost_price_per_day |floatformat:"-3"}} TND / jour</strong></li>
-            <li>• Calculé sur la durée de l'événement</li>
-            <li>• Disponible si début ≥ 14 jours</li>
-            <li>• Priorité dans l'affichage</li>
-          </ul>
-        </div>
-
-        <!-- CAT 3 : Publicités -->
-        <div class="bg-purple-50 border-2 border-purple-200 rounded-2xl p-5">
-          <h3 class="font-bold text-purple-800 mb-1">🖼 Package Publicité</h3>
-          <p class="text-xs text-purple-600 mb-3">Bannières publicitaires dans l'app</p>
-          <ul class="text-sm text-purple-700 space-y-1">
-            <li>• Prix : <strong>{{ ad_price_per_day|floatformat:"-3"}} TND / jour</strong></li>
-            <li>• GIF animé ou image statique</li>
-            <li>• Lien de redirection personnalisé</li>
-            <li>• Activation après paiement</li>
-          </ul>
-        </div>
-
-      </div>
-
-      <!-- Formulaire abonnement -->
-      <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-        <h2 class="text-lg font-semibold text-gray-800 mb-6">Souscrire un abonnement</h2>
-
-        <form method="post" id="subscription-form" class="space-y-6">
-          {% csrf_token %}
-
-          <!-- Période -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-3">Durée</label>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {% for period, info in periods.items %}
-              <label class="cursor-pointer">
-                <input type="radio" name="period" value="{{ period }}"
-                  class="hidden period-radio" {% if forloop.first %}checked{% endif %}
-                  onchange="updatePrice()">
-                <div class="period-box border-2 rounded-xl p-4 text-center transition hover:border-blue-400
-                  {% if forloop.first %}border-blue-500 bg-blue-50{% else %}border-gray-200{% endif %}">
-                  <p class="font-bold text-gray-900">{{ info.label }}</p>
-                  <p class="text-blue-600 font-semibold text-sm mt-1">{{ info.total |floatformat:"-3" }} TND</p>
-                  {% if info.saving > 0 %}
-                  <p class="text-green-500 text-xs mt-0.5">-{{ info.saving |floatformat:"-3" }} TND</p>
-                  {% endif %}
-                </div>
-              </label>
-              {% endfor %}
-            </div>
-          </div>
-
-          <!-- Type paiement -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-3">Type de paiement</label>
-            <div class="grid grid-cols-2 gap-3">
-              <label class="cursor-pointer">
-                <input type="radio" name="payment_type" value="total" class="hidden" checked onchange="updatePrice()">
-                <div class="payment-box border-2 border-blue-500 bg-blue-50 rounded-xl p-4 text-center" data-value="total">
-                  <p class="font-semibold text-gray-900">💰 Paiement total</p>
-                  <p class="text-xs text-gray-500 mt-1">Tout en une fois</p>
-                </div>
-              </label>
-              <label class="cursor-pointer">
-                <input type="radio" name="payment_type" value="monthly" class="hidden" onchange="updatePrice()">
-                <div class="payment-box border-2 border-gray-200 rounded-xl p-4 text-center" data-value="monthly">
-                  <p class="font-semibold text-gray-900">📅 Paiement mensuel</p>
-                  <p class="text-xs text-gray-500 mt-1">Mois par mois</p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <!-- Coupon -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">🎟 Code coupon (optionnel)</label>
-            <div class="flex gap-2">
-              <input type="text" name="coupon_code" id="coupon_code"
-                value="{{ coupon_code|default:'' }}"
-                placeholder="Ex: ABC12345"
-                class="flex-1 border border-gray-200 rounded-xl px-4 py-3 text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500">
-              <button type="button" onclick="verifyCoupon()"
-                class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium px-4 py-3 rounded-xl transition text-sm">
-                Vérifier
-              </button>
-            </div>
-            <div id="coupon-result" class="mt-2 text-sm hidden"></div>
-            {% if coupon_error %}
-            <p class="mt-1 text-xs text-red-500">{{ coupon_error }}</p>
-            {% endif %}
-            {% if applied_coupon %}
-            <div class="mt-2 bg-green-50 border border-green-200 rounded-xl p-3 text-sm text-green-700">
-              ✅ Coupon appliqué : <strong>{{ applied_coupon.discount_percentage }}%</strong> de réduction
-            </div>
-            {% endif %}
-          </div>
-
-          <!-- Récapitulatif -->
-          <div class="bg-blue-50 border border-blue-200 rounded-xl p-5">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm font-medium text-blue-700" id="summary-label">Montant à payer</p>
-                <p class="text-xs text-blue-500 mt-0.5" id="summary-detail"></p>
-              </div>
-              <p class="text-2xl font-bold text-blue-700" id="summary-price">10 TND</p>
-            </div>
-          </div>
-
-          <button type="submit"
-            class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition shadow-md text-lg">
-            Payer avec Konnect 🔐
-          </button>
-
-        </form>
-      </div>
-
-      <!-- Tableau comparatif -->
-      <div class="mt-8 bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-        <h3 class="font-semibold text-gray-800 mb-4">Tableau des tarifs</h3>
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="border-b border-gray-100">
-              <th class="text-left py-2 text-gray-500">Durée</th>
-              <th class="text-right py-2 text-gray-500">Prix total</th>
-              <th class="text-right py-2 text-gray-500">Par mois</th>
-              <th class="text-right py-2 text-gray-500">Économie</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for period, info in periods.items %}
-            <tr class="border-b border-gray-50 hover:bg-gray-50">
-              <td class="py-3 font-medium text-gray-900">{{ info.label }}</td>
-              <td class="py-3 text-right text-gray-700">{{ info.total |floatformat:"-3" }} TND</td>
-              <td class="py-3 text-right text-blue-600 font-medium">{{ info.monthly |floatformat:"-3" }} TND</td>
-              <td class="py-3 text-right text-green-600 font-medium">
-                {% if info.saving > 0 %}-{{ info.saving |floatformat:"-3" }} TND{% else %}—{% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
     </div>
-  </main>
+  </div>
+  {% endif %}
+
+  <!-- 3 Catégories de packages -->
+  <div class="flex sm:grid sm:grid-cols-3 gap-4 mb-8 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory">
+
+    <!-- CAT 1 : Abonnement durée -->
+    <div class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-2xl p-5 min-w-[75vw] sm:min-w-0 snap-start shrink-0 sm:shrink">
+      <h3 class="font-bold text-blue-800 dark:text-blue-300 mb-1">📦 Package Abonnement</h3>
+      <p class="text-xs text-blue-600 dark:text-blue-400 mb-3">Accès complet à la plateforme</p>
+      <ul class="text-sm text-blue-700 dark:text-blue-400 space-y-1">
+        <li>• 1 Mois — <strong>10 TND</strong></li>
+        <li>• 3 Mois — <strong>25 TND</strong></li>
+        <li>• 6 Mois — <strong>50 TND</strong></li>
+        <li>• 10 Mois — <strong>80 TND</strong></li>
+        <li>• 1 An — <strong>100 TND</strong></li>
+      </ul>
+    </div>
+
+    <!-- CAT 2 : Boost événement -->
+    <div class="bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-200 dark:border-orange-800 rounded-2xl p-5 min-w-[75vw] sm:min-w-0 snap-start shrink-0 sm:shrink">
+      <h3 class="font-bold text-orange-800 dark:text-orange-300 mb-1">🚀 Package Boost Événement</h3>
+      <p class="text-xs text-orange-600 dark:text-orange-400 mb-3">Mise en avant de vos événements</p>
+      <ul class="text-sm text-orange-700 dark:text-orange-400 space-y-1">
+        <li>• Prix : <strong>{{ boost_price_per_day|floatformat:"-3" }} TND / jour</strong></li>
+        <li>• Calculé sur la durée de l'événement</li>
+        <li>• Disponible si début ≥ 14 jours</li>
+        <li>• Priorité dans l'affichage</li>
+      </ul>
+    </div>
+
+    <!-- CAT 3 : Publicités -->
+    <div class="bg-purple-50 dark:bg-purple-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-2xl p-5 min-w-[75vw] sm:min-w-0 snap-start shrink-0 sm:shrink">
+      <h3 class="font-bold text-purple-800 dark:text-purple-300 mb-1">🖼 Package Publicité</h3>
+      <p class="text-xs text-purple-600 dark:text-purple-400 mb-3">Bannières publicitaires dans l'app</p>
+      <ul class="text-sm text-purple-700 dark:text-purple-400 space-y-1">
+        <li>• Prix : <strong>{{ ad_price_per_day|floatformat:"-3" }} TND / jour</strong></li>
+        <li>• GIF animé ou image statique</li>
+        <li>• Lien de redirection personnalisé</li>
+        <li>• Activation après paiement</li>
+      </ul>
+    </div>
+
+  </div>
+
+  <!-- Formulaire abonnement -->
+  <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6 sm:p-8">
+    <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-6">Souscrire un abonnement</h2>
+
+    <form method="post" id="subscription-form" class="space-y-6">
+      {% csrf_token %}
+
+      <!-- Période -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Durée</label>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          {% for period, info in periods.items %}
+          <label class="cursor-pointer">
+            <input type="radio" name="period" value="{{ period }}"
+              class="hidden period-radio" {% if forloop.first %}checked{% endif %}
+              onchange="updatePrice()">
+            <div class="period-box border-2 rounded-xl p-4 text-center transition
+              {% if forloop.first %}box-selected{% else %}box-unselected{% endif %}">
+              <p class="font-bold text-gray-900 dark:text-white text-sm">{{ info.label }}</p>
+              <p class="text-blue-600 dark:text-blue-400 font-semibold text-sm mt-1">{{ info.total|floatformat:"-3" }} TND</p>
+              {% if info.saving > 0 %}
+              <p class="text-green-500 dark:text-green-400 text-xs mt-0.5">-{{ info.saving|floatformat:"-3" }} TND</p>
+              {% endif %}
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- Type paiement -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Type de paiement</label>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="cursor-pointer">
+            <input type="radio" name="payment_type" value="total" class="hidden" checked onchange="updatePrice()">
+            <div class="payment-box border-2 rounded-xl p-4 text-center box-selected" data-value="total">
+              <p class="font-semibold text-gray-900 dark:text-white">💰 Paiement total</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Tout en une fois</p>
+            </div>
+          </label>
+          <label class="cursor-pointer">
+            <input type="radio" name="payment_type" value="monthly" class="hidden" onchange="updatePrice()">
+            <div class="payment-box border-2 rounded-xl p-4 text-center box-unselected" data-value="monthly">
+              <p class="font-semibold text-gray-900 dark:text-white">📅 Paiement mensuel</p>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Mois par mois</p>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Coupon -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">🎟 Code coupon (optionnel)</label>
+        <div class="flex gap-2">
+          <input type="text" name="coupon_code" id="coupon_code"
+            value="{{ coupon_code|default:'' }}"
+            placeholder="Ex: ABC12345"
+            class="flex-1 border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white rounded-xl px-4 py-3 text-sm uppercase tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 dark:placeholder-gray-500">
+          <button type="button" onclick="verifyCoupon()"
+            class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium px-4 py-3 rounded-xl transition text-sm whitespace-nowrap">
+            Vérifier
+          </button>
+        </div>
+        <div id="coupon-result" class="mt-2 text-sm hidden"></div>
+        {% if coupon_error %}
+        <p class="mt-1 text-xs text-red-500">{{ coupon_error }}</p>
+        {% endif %}
+        {% if applied_coupon %}
+        <div class="mt-2 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-3 text-sm text-green-700 dark:text-green-400">
+          ✅ Coupon appliqué : <strong>{{ applied_coupon.discount_percentage }}%</strong> de réduction
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Récapitulatif -->
+      <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-5">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <p class="text-sm font-medium text-blue-700 dark:text-blue-300" id="summary-label">Montant à payer</p>
+            <p class="text-xs text-blue-500 dark:text-blue-400 mt-0.5" id="summary-detail"></p>
+          </div>
+          <p class="text-2xl font-bold text-blue-700 dark:text-blue-300" id="summary-price">10 TND</p>
+        </div>
+      </div>
+
+      <button type="submit"
+        class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition shadow-md text-lg">
+        Payer avec Konnect 🔐
+      </button>
+
+    </form>
+  </div>
+
+  <!-- Tableau comparatif -->
+  <div class="mt-8 bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
+    <h3 class="font-semibold text-gray-800 dark:text-white mb-4">Tableau des tarifs</h3>
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm min-w-[360px]">
+        <thead>
+          <tr class="border-b border-gray-100 dark:border-gray-700">
+            <th class="text-left py-2 text-gray-500 dark:text-gray-400">Durée</th>
+            <th class="text-right py-2 text-gray-500 dark:text-gray-400">Prix total</th>
+            <th class="text-right py-2 text-gray-500 dark:text-gray-400">Par mois</th>
+            <th class="text-right py-2 text-gray-500 dark:text-gray-400">Économie</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for period, info in periods.items %}
+          <tr class="border-b border-gray-50 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+            <td class="py-3 font-medium text-gray-900 dark:text-white">{{ info.label }}</td>
+            <td class="py-3 text-right text-gray-700 dark:text-gray-300">{{ info.total|floatformat:"-3" }} TND</td>
+            <td class="py-3 text-right text-blue-600 dark:text-blue-400 font-medium">{{ info.monthly|floatformat:"-3" }} TND</td>
+            <td class="py-3 text-right text-green-600 dark:text-green-400 font-medium">
+              {% if info.saving > 0 %}-{{ info.saving|floatformat:"-3" }} TND{% else %}—{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
+
+<style>
+  .box-selected {
+    border-color: #3b82f6 !important;
+    background-color: #1e3a5f !important;
+  }
+  .box-unselected {
+    border-color: #4b5563;
+    background-color: #374151;
+  }
+</style>
 
 <script>
 const PRICES = {
-  '1_month':   { total: 10 monthly: 10, label: '1 Mois' },
-  '3_months':  { total: 25 monthly: 8.333,  label: '3 Mois' },
-  '6_months':  { total: 50 monthly: 8.333,  label: '6 Mois' },
-  '10_months': { total: 80 monthly: 8.000,  label: '10 Mois' },
-  '12_months': { total: 100 monthly: 8.333, label: '1 An' },
+  '1_month':   { total: 10,  monthly: 10,    label: '1 Mois' },
+  '3_months':  { total: 25,  monthly: 8.333, label: '3 Mois' },
+  '6_months':  { total: 50,  monthly: 8.333, label: '6 Mois' },
+  '10_months': { total: 80,  monthly: 8.000, label: '10 Mois' },
+  '12_months': { total: 100, monthly: 8.333, label: '1 An' },
 };
 
 let discountPct = {% if applied_coupon %}{{ applied_coupon.discount_percentage }}{% else %}0{% endif %};
@@ -216,37 +225,24 @@ function updatePrice() {
   const info        = PRICES[period];
 
   let amount = paymentType === 'total' ? info.total : info.monthly;
-  if (discountPct > 0) {
-    amount = amount * (1 - discountPct / 100);
-  }
+  if (discountPct > 0) amount = amount * (1 - discountPct / 100);
 
   document.getElementById('summary-price').textContent  = amount.toFixed(3) + ' TND';
   document.getElementById('summary-label').textContent  = info.label + ' — ' + (paymentType === 'total' ? 'Paiement total' : 'Mensuel');
   document.getElementById('summary-detail').textContent = discountPct > 0 ? `Après réduction ${discountPct}%` : '';
 
-  // Visuels
-  document.querySelectorAll('.period-box').forEach(b => {
-    b.classList.remove('border-blue-500','bg-blue-50');
-    b.classList.add('border-gray-200');
-  });
+  document.querySelectorAll('.period-box').forEach(b => b.classList.replace('box-selected', 'box-unselected') || b.classList.add('box-unselected'));
   const sel = document.querySelector(`input[name="period"][value="${period}"]`);
-  if (sel) {
-    sel.nextElementSibling.classList.add('border-blue-500','bg-blue-50');
-    sel.nextElementSibling.classList.remove('border-gray-200');
-  }
-  document.querySelectorAll('.payment-box').forEach(b => {
-    b.classList.remove('border-blue-500','bg-blue-50');
-    b.classList.add('border-gray-200');
-  });
-  document.querySelector(`.payment-box[data-value="${paymentType}"]`)
-    ?.classList.replace('border-gray-200','border-blue-500');
-  document.querySelector(`.payment-box[data-value="${paymentType}"]`)
-    ?.classList.add('bg-blue-50');
+  if (sel) { sel.nextElementSibling.classList.remove('box-unselected'); sel.nextElementSibling.classList.add('box-selected'); }
+
+  document.querySelectorAll('.payment-box').forEach(b => b.classList.replace('box-selected', 'box-unselected') || b.classList.add('box-unselected'));
+  const payBox = document.querySelector(`.payment-box[data-value="${paymentType}"]`);
+  if (payBox) { payBox.classList.remove('box-unselected'); payBox.classList.add('box-selected'); }
 }
 
 function verifyCoupon() {
-  const code    = document.getElementById('coupon_code').value.trim().toUpperCase();
-  const result  = document.getElementById('coupon-result');
+  const code   = document.getElementById('coupon_code').value.trim().toUpperCase();
+  const result = document.getElementById('coupon-result');
   if (!code) return;
 
   fetch(`/partners/coupon/verify/?code=${code}&category=subscription`)

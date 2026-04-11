@@ -473,6 +473,7 @@ class ReceiptHistory(models.Model):
     details        = models.JSONField(default=dict, blank=True)
     sent_to_email  = models.EmailField(blank=True)
     created_at     = models.DateTimeField(auto_now_add=True)
+    pdf_file = models.FileField(upload_to='receipts/', blank=True, null=True)
 
     class Meta:
         verbose_name        = 'Reçu'
