@@ -4783,25 +4783,24 @@ body.dark,
   --color-dark-strong: #dce9f5;
 }
 
-/* --- Inputs / Selects / Textareas sans condition de classe --- */
-/* Ciblage direct, haute spécificité, couvre tous les cas */
-input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="range"]),
-select,
-textarea {
+/* --- Inputs / Selects / Textareas en mode sombre --- */
+.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="range"]),
+.dark select,
+.dark textarea {
   background-color: #1a2840 !important;
   color: #dce9f5 !important;
   border-color: #2a3d55 !important;
 }
 
-input:not([type="checkbox"]):not([type="radio"])::placeholder,
-textarea::placeholder {
+.dark input:not([type="checkbox"]):not([type="radio"])::placeholder,
+.dark textarea::placeholder {
   color: #4e6a88 !important;
   opacity: 1 !important;
 }
 
-input:not([type="checkbox"]):not([type="radio"]):focus,
-select:focus,
-textarea:focus {
+.dark input:not([type="checkbox"]):not([type="radio"]):focus,
+.dark select:focus,
+.dark textarea:focus {
   background-color: #1e2f4a !important;
   border-color: #3b82f6 !important;
   outline: none !important;
@@ -4809,20 +4808,20 @@ textarea:focus {
 }
 
 /* Options dans les selects natifs */
-select option {
+.dark select option {
   background-color: #1a2840;
   color: #dce9f5;
 }
 
 /* Inputs date/time */
-input[type="date"],
-input[type="time"],
-input[type="datetime-local"] {
+.dark input[type="date"],
+.dark input[type="time"],
+.dark input[type="datetime-local"] {
   color-scheme: dark;
 }
 
 /* Icône calendrier visible sur fond sombre */
-::-webkit-calendar-picker-indicator {
+.dark ::-webkit-calendar-picker-indicator {
   filter: invert(0.7) sepia(0.3) saturate(0.5) hue-rotate(180deg);
   cursor: pointer;
 }

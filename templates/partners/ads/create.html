@@ -11,7 +11,7 @@
 
   <div class="mb-6">
     <a href="{% url 'partners:ad_list' %}" class="text-sm text-gray-400 hover:text-gray-300 flex items-center gap-1 mb-3">
-      { % trans "Back to ads" %}  
+      {% trans "Back to ads" %}  
     </a>
     <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{% trans "New Ad" %}</h1>
     <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">{% trans "Price:" %} <strong>{{ ad_price_per_day }} DT / jour</strong> —  {% trans "Price calculated automatically" %}</p>
@@ -117,7 +117,7 @@
       <!-- Boutons -->
       <div class="flex flex-col sm:flex-row gap-3 pt-1">
         <button type="submit"
-          class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md text-sm">
+          class="flex-1 bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md text-sm">
           {% trans "Continue to confirmation" %} →
         </button>
         <a href="{% url 'partners:ad_list' %}"
@@ -145,21 +145,26 @@
   /* ── Inputs en mode sombre ── */
   .dark #adForm input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="hidden"]),
   .dark #adForm textarea {
-    background-color: #1a2840 !important;
-    color: #dce9f5 !important;
-    border-color: #2a3d55 !important;
-    width: 100% !important;
-    box-sizing: border-box !important;
+    background-color: rgba(30, 41, 59, 0.5) !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
   }
-  .dark #adForm input::placeholder,
-  .dark #adForm textarea::placeholder { color: #4e6a88 !important; opacity: 1 !important; }
-  .dark #adForm input:focus,
-  .dark #adForm textarea:focus {
-    background-color: #1e2f4a !important;
-    border-color: #7c3aed !important;
-    box-shadow: 0 0 0 3px rgba(124,58,237,.2) !important;
+  
+  #adForm input:focus,
+  #adForm textarea:focus {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
     outline: none !important;
   }
+
+  .dark #adForm input:focus,
+  .dark #adForm textarea:focus {
+    border-color: #818cf8 !important;
+    box-shadow: 0 0 0 3px rgba(129, 140, 248, 0.2) !important;
+  }
+  
+  .dark #adForm input::placeholder,
+  .dark #adForm textarea::placeholder { color: #94a3b8 !important; }
   .dark #adForm input[type="date"] { color-scheme: dark; }
 
   /* ── Inputs width fix (tous modes) ── */
