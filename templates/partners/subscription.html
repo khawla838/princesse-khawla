@@ -1,16 +1,15 @@
 {% extends 'partners/base.html' %}
-{% block title %}Mon Abonnement{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "My Subscription" %}{% endblock %}
 
 {% block content %}
 <div class="w-full space-y-5 px-2">
 
-  <!-- Header -->
   <div>
-    <h1 class="text-2xl font-medium text-gray-900 dark:text-white">Mon abonnement</h1>
-    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Choisissez votre formule et procédez au paiement</p>
+    <h1 class="text-2xl font-medium text-gray-900 dark:text-white">{% trans "My subscription" %}</h1>
+    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">{% trans "Choose your plan and proceed to payment" %}</p>
   </div>
 
-  <!-- Statut actuel -->
   {% if partner.contract_end %}
   <div class="flex items-center gap-3 px-4 py-3 rounded-lg
     {% if contract_active %}bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800
@@ -18,70 +17,63 @@
     <span class="inline-block w-2 h-2 rounded-full flex-shrink-0
       {% if contract_active %}bg-violet-500{% else %}bg-red-500{% endif %}"></span>
     <p class="text-sm font-medium {% if contract_active %}text-violet-800 dark:text-violet-300{% else %}text-red-800 dark:text-red-300{% endif %}">
-      {% if contract_active %}Abonnement actif{% else %}Abonnement expiré{% endif %}
+      {% if contract_active %}{% trans "Active subscription" %}{% else %}{% trans "Expired subscription" %}{% endif %}
       <span class="font-normal {% if contract_active %}text-violet-600 dark:text-violet-400{% else %}text-red-600 dark:text-red-400{% endif %}">
-        — expire le {{ partner.contract_end|date:"d M Y" }}
+        — {% trans "expires on" %} {{ partner.contract_end|date:"d M Y" }}
         {% if days_until_expiry is not None %}
-          ({% if days_until_expiry > 0 %}dans {{ days_until_expiry }} jour(s){% else %}expiré{% endif %})
+          ({% if days_until_expiry > 0 %}{% blocktrans with days=days_until_expiry %}in {{ days }} day(s){% endblocktrans %}{% else %}{% trans "expired" %}{% endif %})
         {% endif %}
       </span>
     </p>
   </div>
   {% endif %}
 
-  <!-- 3 packages -->
   <div class="flex sm:grid sm:grid-cols-3 gap-3 overflow-x-auto pb-2 -mx-1 px-1 snap-x snap-mandatory">
 
-    <!-- Package Abonnement -->
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 min-w-[75vw] sm:min-w-0 snap-start shrink-0 sm:shrink">
-      <span class="inline-block text-xs font-medium px-2 py-0.5 rounded bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 mb-3">Abonnement</span>
-      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Accès plateforme</h3>
+      <span class="inline-block text-xs font-medium px-2 py-0.5 rounded bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 mb-3">{% trans "Subscription" %}</span>
+      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{% trans "Platform access" %}</h3>
       <ul class="text-xs text-gray-500 dark:text-gray-400 space-y-2">
-        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>1 mois</span><strong class="text-gray-900 dark:text-white font-medium">10 TND</strong></li>
-        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>3 mois</span><strong class="text-gray-900 dark:text-white font-medium">25 TND</strong></li>
-        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>6 mois</span><strong class="text-gray-900 dark:text-white font-medium">50 TND</strong></li>
-        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>10 mois</span><strong class="text-gray-900 dark:text-white font-medium">80 TND</strong></li>
-        <li class="flex justify-between"><span>1 an</span><strong class="text-gray-900 dark:text-white font-medium">100 TND</strong></li>
+        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>{% trans "1 month" %}</span><strong class="text-gray-900 dark:text-white font-medium">10 TND</strong></li>
+        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>{% trans "3 months" %}</span><strong class="text-gray-900 dark:text-white font-medium">25 TND</strong></li>
+        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>{% trans "6 months" %}</span><strong class="text-gray-900 dark:text-white font-medium">50 TND</strong></li>
+        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>{% trans "10 months" %}</span><strong class="text-gray-900 dark:text-white font-medium">80 TND</strong></li>
+        <li class="flex justify-between"><span>{% trans "1 year" %}</span><strong class="text-gray-900 dark:text-white font-medium">100 TND</strong></li>
       </ul>
     </div>
 
-    <!-- Package Boost -->
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 min-w-[75vw] sm:min-w-0 snap-start shrink-0 sm:shrink">
-      <span class="inline-block text-xs font-medium px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 mb-3">Boost événement</span>
-      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Mise en avant</h3>
+      <span class="inline-block text-xs font-medium px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 mb-3">{% trans "Event boost" %}</span>
+      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{% trans "Highlight" %}</h3>
       <ul class="text-xs text-gray-500 dark:text-gray-400 space-y-2">
-        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>Prix / jour</span><strong class="text-gray-900 dark:text-white font-medium">{{ boost_price_per_day|floatformat:"-3" }} TND</strong></li>
-        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>Début min.</span><strong class="text-gray-900 dark:text-white font-medium">14 jours</strong></li>
-        <li class="flex justify-between"><span>Priorité affichage</span><strong class="text-gray-900 dark:text-white font-medium">Oui</strong></li>
+        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>{% trans "Price / day" %}</span><strong class="text-gray-900 dark:text-white font-medium">{{ boost_price_per_day|floatformat:"-3" }} TND</strong></li>
+        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>{% trans "Min. start" %}</span><strong class="text-gray-900 dark:text-white font-medium">14 {% trans "days" %}</strong></li>
+        <li class="flex justify-between"><span>{% trans "Display priority" %}</span><strong class="text-gray-900 dark:text-white font-medium">{% trans "Yes" %}</strong></li>
       </ul>
     </div>
 
-    <!-- Package Pub -->
     <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-4 min-w-[75vw] sm:min-w-0 snap-start shrink-0 sm:shrink">
-      <span class="inline-block text-xs font-medium px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 mb-3">Publicité</span>
-      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Bannières app</h3>
+      <span class="inline-block text-xs font-medium px-2 py-0.5 rounded bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 mb-3">{% trans "Advertising" %}</span>
+      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">{% trans "App banners" %}</h3>
       <ul class="text-xs text-gray-500 dark:text-gray-400 space-y-2">
-        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>Prix / jour</span><strong class="text-gray-900 dark:text-white font-medium">{{ ad_price_per_day|floatformat:"-3" }} TND</strong></li>
-        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>Format</span><strong class="text-gray-900 dark:text-white font-medium">GIF / image</strong></li>
-        <li class="flex justify-between"><span>Lien personnalisé</span><strong class="text-gray-900 dark:text-white font-medium">Oui</strong></li>
+        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>{% trans "Price / day" %}</span><strong class="text-gray-900 dark:text-white font-medium">{{ ad_price_per_day|floatformat:"-3" }} TND</strong></li>
+        <li class="flex justify-between border-b border-gray-100 dark:border-gray-700 pb-1.5"><span>{% trans "Format" %}</span><strong class="text-gray-900 dark:text-white font-medium">GIF / image</strong></li>
+        <li class="flex justify-between"><span>{% trans "Custom link" %}</span><strong class="text-gray-900 dark:text-white font-medium">{% trans "Yes" %}</strong></li>
       </ul>
     </div>
 
   </div>
 
-  <!-- Grille formulaire + tableau -->
   <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-    <!-- Formulaire -->
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
-      <h2 class="text-sm font-medium text-gray-900 dark:text-white mb-5">Souscrire un abonnement</h2>
+      <h2 class="text-sm font-medium text-gray-900 dark:text-white mb-5">{% trans "Subscribe" %}</h2>
 
       <form method="post" id="subscription-form" class="space-y-5">
         {% csrf_token %}
 
-        <!-- Période -->
         <div>
-          <label class="block text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Durée</label>
+          <label class="block text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">{% trans "Duration" %}</label>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
             {% for period, info in periods.items %}
             <label class="cursor-pointer">
@@ -101,30 +93,28 @@
           </div>
         </div>
 
-        <!-- Type paiement -->
         <div>
-          <label class="block text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Type de paiement</label>
+          <label class="block text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">{% trans "Payment type" %}</label>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
             <label class="cursor-pointer">
               <input type="radio" name="payment_type" value="total" class="hidden" checked onchange="updatePrice()">
               <div class="payment-box border rounded-lg p-3 transition-all duration-100 box-selected" data-value="total">
-                <p class="text-sm font-medium text-gray-900 dark:text-white">Paiement total</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Tout en une fois</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{% trans "Full payment" %}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{% trans "All at once" %}</p>
               </div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="payment_type" value="monthly" class="hidden" onchange="updatePrice()">
               <div class="payment-box border rounded-lg p-3 transition-all duration-100 box-unselected" data-value="monthly">
-                <p class="text-sm font-medium text-gray-900 dark:text-white">Paiement mensuel</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Mois par mois</p>
+                <p class="text-sm font-medium text-gray-900 dark:text-white">{% trans "Monthly payment" %}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{% trans "Month by month" %}</p>
               </div>
             </label>
           </div>
         </div>
 
-        <!-- Coupon -->
         <div>
-          <label class="block text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">Code coupon (optionnel)</label>
+          <label class="block text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2.5">{% trans "Coupon code (optional)" %}</label>
           <div class="flex gap-2">
             <input type="text" name="coupon_code" id="coupon_code"
               value="{{ coupon_code|default:'' }}"
@@ -132,25 +122,16 @@
               class="flex-1 border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700/50 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm uppercase tracking-widest focus:outline-none focus:ring-1 focus:ring-violet-400 focus:border-violet-400 placeholder-gray-400 dark:placeholder-gray-500">
             <button type="button" onclick="verifyCoupon()"
               class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 text-sm font-medium px-4 py-2 rounded-lg transition border border-gray-200 dark:border-gray-600 whitespace-nowrap">
-              Vérifier
+              {% trans "Verify" %}
             </button>
           </div>
-          <div id="coupon-result" class="mt-2 text-xs hidden rounded-lg px-3 py-2"></div>
-          {% if coupon_error %}
-          <p class="mt-1 text-xs text-red-500">{{ coupon_error }}</p>
-          {% endif %}
-          {% if applied_coupon %}
-          <div class="mt-2 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg p-2.5 text-xs text-emerald-700 dark:text-emerald-400">
-            Coupon appliqué : <strong class="font-medium">{{ applied_coupon.discount_percentage }}%</strong> de réduction
-          </div>
-          {% endif %}
+          <div id="coupon-result" class="hidden mt-2 text-xs rounded-lg px-3 py-2"></div>
         </div>
 
-        <!-- Récapitulatif -->
         <div class="bg-violet-50 dark:bg-violet-950/30 border border-violet-200 dark:border-violet-800 rounded-lg p-4">
           <div class="flex items-center justify-between flex-wrap gap-2">
             <div>
-              <p class="text-xs font-medium text-violet-700 dark:text-violet-300" id="summary-label">1 Mois — Paiement total</p>
+              <p class="text-xs font-medium text-violet-700 dark:text-violet-300" id="summary-label">{% trans "1 Month — Full payment" %}</p>
               <p class="text-xs text-violet-500 dark:text-violet-400 mt-0.5" id="summary-detail"></p>
             </div>
             <p class="text-xl font-semibold text-violet-800 dark:text-violet-200" id="summary-price">10 TND</p>
@@ -159,23 +140,22 @@
 
         <button type="submit"
           class="w-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-3 px-6 rounded-lg transition text-sm">
-          Payer avec Konnect
+          {% trans "Pay with Konnect" %}
         </button>
 
       </form>
     </div>
 
-    <!-- Tableau -->
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5 h-fit">
-      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">Tableau des tarifs</h3>
+      <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-4">{% trans "Pricing table" %}</h3>
       <div class="overflow-x-auto">
         <table class="w-full text-sm min-w-[340px]">
           <thead>
             <tr class="border-b border-gray-100 dark:border-gray-700">
-              <th class="text-left pb-2 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Durée</th>
-              <th class="text-right pb-2 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Total</th>
-              <th class="text-right pb-2 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">/ mois</th>
-              <th class="text-right pb-2 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Économie</th>
+              <th class="text-left pb-2 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{% trans "Duration" %}</th>
+              <th class="text-right pb-2 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{% trans "Total" %}</th>
+              <th class="text-right pb-2 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">/ {% trans "month" %}</th>
+              <th class="text-right pb-2 text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{% trans "Saving" %}</th>
             </tr>
           </thead>
           <tbody>
@@ -203,31 +183,19 @@
 </div>
 
 <style>
-  .box-selected {
-    border-color: #7c3aed !important;
-    background-color: #f5f3ff !important;
-  }
-  .box-unselected {
-    border-color: #e5e7eb;
-    background-color: transparent;
-  }
-  .dark .box-selected {
-    border-color: #7c3aed !important;
-    background-color: rgba(124, 58, 237, 0.12) !important;
-  }
-  .dark .box-unselected {
-    border-color: #374151;
-    background-color: transparent;
-  }
+  .box-selected { border-color: #7c3aed !important; background-color: #f5f3ff !important; }
+  .box-unselected { border-color: #e5e7eb; background-color: transparent; }
+  .dark .box-selected { border-color: #7c3aed !important; background-color: rgba(124,58,237,0.12) !important; }
+  .dark .box-unselected { border-color: #374151; background-color: transparent; }
 </style>
 
 <script>
 const PRICES = {
-  '1_month':   { total: 10,  monthly: 10,    label: '1 Mois' },
-  '3_months':  { total: 25,  monthly: 8.333, label: '3 Mois' },
-  '6_months':  { total: 50,  monthly: 8.333, label: '6 Mois' },
-  '10_months': { total: 80,  monthly: 8.000, label: '10 Mois' },
-  '12_months': { total: 100, monthly: 8.333, label: '1 An' },
+  '1_month':   { total: 10,  monthly: 10,    label: '{% trans "1 Month" %}' },
+  '3_months':  { total: 25,  monthly: 8.333, label: '{% trans "3 Months" %}' },
+  '6_months':  { total: 50,  monthly: 8.333, label: '{% trans "6 Months" %}' },
+  '10_months': { total: 80,  monthly: 8.000, label: '{% trans "10 Months" %}' },
+  '12_months': { total: 100, monthly: 8.333, label: '{% trans "1 Year" %}' },
 };
 
 let discountPct = {% if applied_coupon %}{{ applied_coupon.discount_percentage }}{% else %}0{% endif %};
@@ -236,18 +204,14 @@ function updatePrice() {
   const period      = document.querySelector('input[name="period"]:checked')?.value || '1_month';
   const paymentType = document.querySelector('input[name="payment_type"]:checked')?.value || 'total';
   const info        = PRICES[period];
-
   let amount = paymentType === 'total' ? info.total : info.monthly;
   if (discountPct > 0) amount = amount * (1 - discountPct / 100);
-
-  document.getElementById('summary-price').textContent  = amount.toFixed(3) + ' TND';
-  document.getElementById('summary-label').textContent  = info.label + ' — ' + (paymentType === 'total' ? 'Paiement total' : 'Mensuel');
-  document.getElementById('summary-detail').textContent = discountPct > 0 ? `Après réduction ${discountPct}%` : '';
-
+  document.getElementById('summary-price').textContent = amount.toFixed(3) + ' TND';
+  document.getElementById('summary-label').textContent = info.label + ' — ' + (paymentType === 'total' ? '{% trans "Full payment" %}' : '{% trans "Monthly" %}');
+  document.getElementById('summary-detail').textContent = discountPct > 0 ? `{% trans "After discount" %} ${discountPct}%` : '';
   document.querySelectorAll('.period-box').forEach(b => { b.classList.remove('box-selected'); b.classList.add('box-unselected'); });
   const sel = document.querySelector(`input[name="period"][value="${period}"]`);
   if (sel) { sel.nextElementSibling.classList.remove('box-unselected'); sel.nextElementSibling.classList.add('box-selected'); }
-
   document.querySelectorAll('.payment-box').forEach(b => { b.classList.remove('box-selected'); b.classList.add('box-unselected'); });
   const payBox = document.querySelector(`.payment-box[data-value="${paymentType}"]`);
   if (payBox) { payBox.classList.remove('box-unselected'); payBox.classList.add('box-selected'); }
@@ -257,7 +221,6 @@ function verifyCoupon() {
   const code   = document.getElementById('coupon_code').value.trim().toUpperCase();
   const result = document.getElementById('coupon-result');
   if (!code) return;
-
   fetch(`/partners/coupon/verify/?code=${code}&category=subscription`)
     .then(r => r.json())
     .then(data => {
@@ -265,7 +228,7 @@ function verifyCoupon() {
       if (data.valid) {
         discountPct = data.discount;
         result.className = 'mt-2 text-xs rounded-lg px-3 py-2 bg-emerald-50 border border-emerald-200 text-emerald-700 dark:bg-emerald-950/30 dark:border-emerald-800 dark:text-emerald-400';
-        result.textContent = `Coupon valide — ${data.discount}% de réduction`;
+        result.textContent = `{% trans "Valid coupon" %} — ${data.discount}% {% trans "discount" %}`;
         updatePrice();
       } else {
         discountPct = 0;
@@ -273,11 +236,6 @@ function verifyCoupon() {
         result.textContent = data.error;
         updatePrice();
       }
-    })
-    .catch(() => {
-      result.classList.remove('hidden');
-      result.className = 'mt-2 text-xs text-red-500';
-      result.textContent = 'Erreur de vérification';
     });
 }
 

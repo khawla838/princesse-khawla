@@ -1,5 +1,6 @@
 from django.urls import path, include
 
+
 from .views import (
     DashboardView,
     SubscribersListView,
@@ -46,6 +47,7 @@ from .views import (
     get_schedules,
     get_locations_by_city,
     ReceiptListView,
+    EmailChangeListView,
 )
 
 app_name = "guard"
@@ -178,7 +180,7 @@ urlpatterns = [
             ]
         ),
     ),
-    # ── Click tracking temps réel ──────────────────────────────────
+    # ── Click tracking ─────────────────────────────────────────────
     path("ad/<int:pk>/go/",    AdClickView.as_view(),    name="ad_click"),
     path("event/<int:pk>/go/", EventClickView.as_view(), name="event_click"),
 
@@ -213,5 +215,9 @@ urlpatterns = [
         PricingSettingsView.as_view(),
         name="pricing_settings",
     ),
-
+    path(
+        'partners/email-changes/',
+        EmailChangeListView.as_view(),
+        name='email_changes',
+    ),
 ]

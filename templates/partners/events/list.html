@@ -1,13 +1,13 @@
 {% extends 'partners/base.html' %}
-{% block title %}Mes Événements{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "My Events" %}{% endblock %}
 
 {% block content %}
 
-  <!-- Header -->
   <div class="flex items-start sm:items-center justify-between mb-6 gap-3 flex-wrap">
     <div>
-      <h1 class="text-2xl font-medium text-gray-900 dark:text-white">Mes événements</h1>
-      <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Gérez vos événements publiés</p>
+      <h1 class="text-2xl font-medium text-gray-900 dark:text-white">{% trans "My events" %}</h1>
+      <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">{% trans "Manage your published events" %}</p>
     </div>
     {% if can_add %}
     <a href="{% url 'partners:event_create' %}"
@@ -15,14 +15,14 @@
       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
       </svg>
-      Nouvel événement
+      {% trans "New event" %}
     </a>
     {% else %}
     <div class="inline-flex items-center gap-2 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 text-xs font-medium px-3 py-2 rounded-lg">
       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
         <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/>
       </svg>
-      Compte suspendu
+      {% trans "Account suspended" %}
     </div>
     {% endif %}
   </div>
@@ -32,99 +32,74 @@
     {% for event in events %}
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
 
-      <!-- Titre + Badge + Délai -->
       <div class="flex items-start justify-between gap-3 mb-2 flex-wrap">
         <div class="flex items-center gap-2 flex-wrap">
           <h3 class="font-medium text-gray-900 dark:text-white text-sm">{{ event.title }}</h3>
           {% if event.is_boosted %}
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
-            </svg>
-            Boosté
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+            {% trans "Boosted" %}
           </span>
           {% elif event.status == 'approved' %}
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
-            </svg>
-            Approuvé
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+            {% trans "Approved" %}
           </span>
           {% elif event.status == 'rejected' %}
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
-            Rejeté
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            {% trans "Rejected" %}
           </span>
           {% elif not event.can_be_boosted %}
           <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            En attente
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            {% trans "Pending" %}
           </span>
           {% endif %}
         </div>
         <span class="text-xs text-gray-400 dark:text-gray-500 shrink-0">
-          {% if event.days_until_start > 0 %}Dans {{ event.days_until_start }}j{% else %}En cours{% endif %}
+          {% if event.days_until_start > 0 %}{% blocktrans with days=event.days_until_start %}In {{ days }}d{% endblocktrans %}{% else %}{% trans "In progress" %}{% endif %}
         </span>
       </div>
 
-      <!-- Description -->
       <p class="text-gray-500 dark:text-gray-400 text-xs mb-3 leading-relaxed">{{ event.description|striptags|truncatechars:120 }}</p>
 
-      <!-- Date + lien -->
       <div class="flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500 flex-wrap mb-4">
         <span class="inline-flex items-center gap-1.5">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
-          </svg>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
           {{ event.start_date|date:"d M Y" }} → {{ event.end_date|date:"d M Y" }}
         </span>
         {% if event.link %}
-        <a href="{{ event.link }}" target="_blank" class="inline-flex items-center gap-1.5 text-violet-500 hover:text-violet-600 dark:hover:text-violet-400 transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/>
-          </svg>
-          Lien
+        <a href="{{ event.link }}" target="_blank" class="inline-flex items-center gap-1.5 text-violet-500 hover:text-violet-600 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"/></svg>
+          {% trans "Link" %}
         </a>
         {% endif %}
       </div>
 
-      <!-- Actions -->
       <div class="flex items-center gap-2 flex-wrap">
         {% if event.is_boosted %}
         <span class="inline-flex items-center gap-1.5 bg-violet-50 dark:bg-violet-900/20 text-violet-700 dark:text-violet-400 text-xs font-medium px-3 py-1.5 rounded-lg border border-violet-200 dark:border-violet-800">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
-          </svg>
-          Boosté
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+          {% trans "Boosted" %}
         </span>
         {% elif can_add and event.can_be_boosted %}
         <a href="{% url 'partners:event_boost' event.id %}"
           class="inline-flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition">
-          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
-          </svg>
-          Booster
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+          {% trans "Boost" %}
         </a>
         {% endif %}
 
-        <form method="post" action="{% url 'partners:event_delete' event.id %}"
-          onsubmit="return confirm('Supprimer cet événement ?')">
+        <form method="post" action="{% url 'partners:event_delete' event.id %}" onsubmit="return confirm('{% trans "Delete this event?" %}')">
           {% csrf_token %}
-          <button type="submit"
-            class="inline-flex items-center gap-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-medium px-3 py-1.5 rounded-lg transition border border-red-200 dark:border-red-900">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
-            </svg>
-            Supprimer
+          <button type="submit" class="inline-flex items-center gap-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-950/20 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-medium px-3 py-1.5 rounded-lg transition border border-red-200 dark:border-red-900">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+            {% trans "Delete" %}
           </button>
         </form>
       </div>
 
-      <!-- Médias -->
       {% if event.media.all %}
       <div class="mt-4 flex gap-2 flex-wrap">
         {% for media in event.media.all %}
@@ -132,9 +107,7 @@
           <img src="{{ media.file.url }}" class="w-14 h-14 object-cover rounded-lg border border-gray-100 dark:border-gray-700"/>
           {% else %}
           <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
-            </svg>
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
           </div>
           {% endif %}
         {% endfor %}
@@ -148,19 +121,14 @@
   {% else %}
   <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
     <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center mx-auto mb-4">
-      <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
-      </svg>
+      <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
     </div>
-    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Aucun événement</h3>
-    <p class="text-gray-400 dark:text-gray-500 mb-5 text-xs">Créez votre premier événement pour le faire apparaître ici.</p>
+    <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{% trans "No events" %}</h3>
+    <p class="text-gray-400 dark:text-gray-500 mb-5 text-xs">{% trans "Create your first event to display it here." %}</p>
     {% if can_add %}
-    <a href="{% url 'partners:event_create' %}"
-      class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-medium px-4 py-2 rounded-lg transition text-sm">
-      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
-      </svg>
-      Créer un événement
+    <a href="{% url 'partners:event_create' %}" class="inline-flex items-center gap-2 bg-violet-600 hover:bg-violet-700 text-white font-medium px-4 py-2 rounded-lg transition text-sm">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+      {% trans "Create an event" %}
     </a>
     {% endif %}
   </div>

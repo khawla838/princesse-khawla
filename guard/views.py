@@ -390,3 +390,52 @@ class ReceiptListView(StaffRequiredMixin, LoginRequiredMixin, ListView):
         context['q']            = self.request.GET.get('q', '')
         context['payment_type'] = self.request.GET.get('payment_type', '')
         return context
+
+# ── EMAIL CHANGE REQUESTS ─────────────────────────────────────────────────────
+# Ajoutez ces imports en haut de views.py si pas déjà présents :
+# from partners.models import PartnerAccount  (déjà importé)
+
+from django.views import View
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+
+
+class EmailChangeListView(StaffRequiredMixin, LoginRequiredMixin, TemplateView):
+    template_name = "guard/views/partners/email_changes.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Tous les partenaires avec un email en attente
+        context['pending'] = PartnerAccount.objects.filter(
+            pending_email__isnull=False
+        ).exclude(pending_email='').order_by('-created_at')
+        return context
+
+    def post(self, request, *args, **kwargs):
+        partner_id = request.POST.get('partner_id')
+        action     = request.POST.get('action')  # 'approve' ou 'reject'
+
+        partner = get_object_or_404(PartnerAccount, id=partner_id)
+
+        if action == 'approve' and partner.pending_email:
+            old_email         = partner.email
+            new_email         = partner.pending_email
+
+            # Met à jour l'email du partenaire et de son User
+            partner.email         = new_email
+            partner.pending_email = None
+            partner.save(update_fields=['email', 'pending_email'])
+
+            if partner.user:
+                partner.user.email    = new_email
+                partner.user.username = new_email
+                partner.user.save()
+
+            messages.success(request, f"Email de {partner.company_name} mis à jour : {old_email} → {new_email}")
+
+        elif action == 'reject':
+            partner.pending_email = None
+            partner.save(update_fields=['pending_email'])
+            messages.warning(request, f"Demande de changement d'email de {partner.company_name} rejetée.")
+
+        return redirect('guard:email_changes')

@@ -1,5 +1,6 @@
 {% extends 'partners/base.html' %}
-{% block title %}Nouvelle Publicité{% endblock %}
+{% load i18n %}
+{% block title %}{% trans "New Ad" %}{% endblock %}
 
 {% block content %}
 <!-- Flatpickr -->
@@ -10,10 +11,10 @@
 
   <div class="mb-6">
     <a href="{% url 'partners:ad_list' %}" class="text-sm text-gray-400 hover:text-gray-300 flex items-center gap-1 mb-3">
-      ← Retour aux publicités
+      { % trans "Back to ads" %}  
     </a>
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Nouvelle Publicité</h1>
-    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Tarif : <strong>{{ ad_price_per_day }} DT / jour</strong> — Prix calculé automatiquement</p>
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{% trans "New Ad" %}</h1>
+    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">{% trans "Price:" %} <strong>{{ ad_price_per_day }} DT / jour</strong> —  {% trans "Price calculated automatically" %}</p>
   </div>
 
   <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-6">
@@ -28,24 +29,24 @@
 
       <!-- Nom -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Nom de la publicité</label>
+        <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{% trans "Ad Name" %}</label>
         {{ form.title }}
-        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">Laissez vide pour un nom auto-généré (ADS-XXXXXX).</p>
+        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{% trans "Leave empty for auto-generated name (ADS-XXXXXX)." %}</p>
         {% if form.title.errors %}<p class="mt-1 text-xs text-red-500">{{ form.title.errors.0 }}</p>{% endif %}
       </div>
 
       <!-- Image Mobile -->
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-          Image Mobile (320×50) <span class="text-red-500">*</span>
+          {% trans "Mobile Image (320×50)" %} <span class="text-red-500">*</span>
         </label>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">GIF, PNG, JPG — max 5MB</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">{% trans "GIF, PNG, JPG — max 5MB" %}</p>
         <div id="mobile-drop-zone"
              class="border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-xl p-5 text-center hover:border-purple-400 dark:hover:border-purple-400 transition cursor-pointer bg-gray-50 dark:bg-gray-700/50"
              onclick="document.getElementById('mobileImageInput').click()">
           <div id="mobile-preview-container">
             <div class="text-2xl mb-1">🖼</div>
-            <p class="text-sm text-gray-500 dark:text-gray-300">Cliquez pour sélectionner</p>
+            <p class="text-sm text-gray-500 dark:text-gray-300">{% trans "Click to select" %}</p>
           </div>
           <img id="mobile-preview" class="hidden mx-auto max-h-32 rounded-xl mt-2 object-contain" />
           <input id="mobileImageInput" type="file" name="mobile_image" accept=".jpg,.jpeg,.png,.gif"
@@ -59,15 +60,15 @@
       <!-- Image Tablette -->
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
-          Image Tablette (728×90) <span class="text-red-500">*</span>
+          {% trans "Tablet Image (728×90)" %} <span class="text-red-500">*</span>
         </label>
-        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">GIF, PNG, JPG — max 5MB</p>
+        <p class="text-xs text-gray-400 dark:text-gray-500 mb-2">{% trans "GIF, PNG, JPG — max 5MB" %}</p>
         <div id="tablet-drop-zone"
              class="border-2 border-dashed border-gray-300 dark:border-gray-500 rounded-xl p-5 text-center hover:border-purple-400 dark:hover:border-purple-400 transition cursor-pointer bg-gray-50 dark:bg-gray-700/50"
              onclick="document.getElementById('tabletImageInput').click()">
           <div id="tablet-preview-container">
             <div class="text-2xl mb-1">🖼</div>
-            <p class="text-sm text-gray-500 dark:text-gray-300">Cliquez pour sélectionner</p>
+            <p class="text-sm text-gray-500 dark:text-gray-300">{% trans "Click to select" %}</p>
           </div>
           <img id="tablet-preview" class="hidden mx-auto max-h-32 rounded-xl mt-2 object-contain" />
           <input id="tabletImageInput" type="file" name="tablet_image" accept=".jpg,.jpeg,.png,.gif"
@@ -81,22 +82,22 @@
       <!-- Lien -->
       <div>
         <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">
-          Lien de destination <span class="text-red-500">*</span>
+          {% trans "Destination Link" %} <span class="text-red-500">*</span>
         </label>
         {{ form.destination_link }}
-        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">URL vers laquelle redirige la publicité.</p>
+        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{% trans "URL vers laquelle redirige la publicité." %}</p>
         {% if form.destination_link.errors %}<p class="mt-1 text-xs text-red-500">{{ form.destination_link.errors.0 }}</p>{% endif %}
       </div>
 
       <!-- Dates -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Date de début <span class="text-red-500">*</span></label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{% trans "Start Date" %} <span class="text-red-500">*</span></label>
           {{ form.start_date }}
           {% if form.start_date.errors %}<p class="mt-1 text-xs text-red-500">{{ form.start_date.errors.0 }}</p>{% endif %}
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Date de fin <span class="text-red-500">*</span></label>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{% trans "End Date" %} <span class="text-red-500">*</span></label>
           {{ form.end_date }}
           {% if form.end_date.errors %}<p class="mt-1 text-xs text-red-500">{{ form.end_date.errors.0 }}</p>{% endif %}
         </div>
@@ -106,7 +107,7 @@
       <div id="price-box" class="hidden bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded-xl p-4">
         <div class="flex items-center justify-between">
           <div>
-            <p class="text-sm text-purple-700 dark:text-purple-300 font-medium">Prix calculé</p>
+            <p class="text-sm text-purple-700 dark:text-purple-300 font-medium">{% trans "Calculated Price" %}</p>
             <p class="text-xs text-purple-500 dark:text-purple-400 mt-0.5"><span id="price-days">0</span> jour(s) × {{ ad_price_per_day|floatformat:"-3" }} TND</p>
           </div>
           <p class="text-xl font-bold text-purple-700 dark:text-purple-300"><span id="price-total">0.000</span> TND</p>
@@ -117,11 +118,11 @@
       <div class="flex flex-col sm:flex-row gap-3 pt-1">
         <button type="submit"
           class="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition shadow-md text-sm">
-          Continuer vers confirmation →
+          {% trans "Continue to confirmation" %} →
         </button>
         <a href="{% url 'partners:ad_list' %}"
            class="px-6 py-3 rounded-xl border border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition font-medium text-sm text-center">
-          Annuler
+          {% trans "Cancel" %}
         </a>
       </div>
     </form>

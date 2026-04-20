@@ -1,118 +1,197 @@
 {% extends 'guard/base/index.html' %}
-{% load static i18n %}
+{% load i18n %}
 
-{% block title %}{% trans "Dashboard" %}{% endblock title %}
+{% block title %}
+  {% if partner %}{% trans "Tableau de bord" %} — {{ partner.company_name }}{% else %}{% trans "Tableau de bord" %}{% endif %}
+{% endblock %}
 
-{% block body %}
+{% block content %}
 
-    <!-- 4 STAT CARDS existantes -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-                <div class="p-2 rounded-lg bg-orange-50 dark:bg-orange-900/30">
-                    <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-green-500">+{{ db_stats.locations_this_month }} {% trans "this month" %}</span>
-            </div>
-            <h5 class="text-3xl font-bold text-gray-900 dark:text-white">{{ db_stats.total_locations }}</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{% trans "Locations" %}</p>
-        </div>
+{% if partner %}
+  <div class="mb-6">
+    <h1 class="text-2xl font-medium text-gray-900 dark:text-white">Bonjour, {{ partner.company_name }}</h1>
+    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">Voici un aperçu de votre activité</p>
+  </div>
 
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-                <div class="p-2 rounded-lg bg-green-50 dark:bg-green-900/30">
-                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-blue-500">{{ db_stats.upcoming_events }} {% trans "upcoming" %}</span>
-            </div>
-            <h5 class="text-3xl font-bold text-gray-900 dark:text-white">{{ db_stats.total_events }}</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{% trans "Events" %}</p>
-        </div>
+  {% if partner.account_frozen %}
+  <div class="mb-6 bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900 rounded-xl p-4 flex items-start gap-4">
+    <div class="w-9 h-9 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center flex-shrink-0">
+      <svg class="w-5 h-5 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+      </svg>
+    </div>
+    <div>
+      <h3 class="font-medium text-red-800 dark:text-red-300 text-sm">Compte suspendu</h3>
+      <p class="text-red-600 dark:text-red-400 text-xs mt-1">Votre compte est suspendu pour non-paiement.</p>
+      <a href="{% url 'partners:subscription' %}" class="mt-3 inline-block bg-red-600 hover:bg-red-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition">
+        Renouveler maintenant
+      </a>
+    </div>
+  </div>
+  {% endif %}
 
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-                <div class="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30">
-                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-gray-400">{% trans "trails" %}</span>
-            </div>
-            <h5 class="text-3xl font-bold text-gray-900 dark:text-white">{{ db_stats.total_hikings }}</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{% trans "Hikings" %}</p>
-        </div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 
-        <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm">
-            <div class="flex items-center justify-between mb-3">
-                <div class="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30">
-                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.003 9.003 0 1020.945 13H11V3.055z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-green-500">{{ db_stats.active_ads }} {% trans "active" %}</span>
-            </div>
-            <h5 class="text-3xl font-bold text-gray-900 dark:text-white">{{ db_stats.total_ads }}</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">{% trans "Ads" %}</p>
-        </div>
+    <!-- Contrat -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Contrat</p>
+        <span class="w-8 h-8 rounded-lg flex items-center justify-center {% if contract_active %}bg-emerald-50 dark:bg-emerald-900/30{% else %}bg-red-50 dark:bg-red-900/30{% endif %}">
+          {% if contract_active %}
+          <svg class="w-4 h-4 text-emerald-600 dark:text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.955 11.955 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+          </svg>
+          {% else %}
+          <svg class="w-4 h-4 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          {% endif %}
+        </span>
+      </div>
+      <p class="text-xl font-semibold text-gray-900 dark:text-white">{% if contract_active %}Actif{% else %}Inactif{% endif %}</p>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Expire le {{ partner.contract_end|date:"d M Y" }}</p>
     </div>
 
-    <!-- SECTION PARTENAIRES -->
-    <p class="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-3">
-        Espace Partenaires
-    </p>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-
-        <!-- Events partenaires en attente -->
-        <a href="{% url 'admin:partners_partnerevent_changelist' %}?status=pending"
-           class="bg-white dark:bg-gray-800 border border-yellow-200 dark:border-yellow-700 rounded-xl p-5 shadow-sm hover:shadow-md transition block">
-            <div class="flex items-center justify-between mb-3">
-                <div class="p-2 rounded-lg bg-yellow-50 dark:bg-yellow-900/30">
-                    <svg class="w-5 h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-yellow-500">⏳ À valider</span>
-            </div>
-            <h5 class="text-3xl font-bold text-gray-900 dark:text-white">{{ db_stats.pending_partner_events }}</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Events Partenaires</p>
-        </a>
-
-        <!-- Ads partenaires en attente de paiement -->
-        <a href="{% url 'admin:partners_partnerad_changelist' %}"
-           class="bg-white dark:bg-gray-800 border border-purple-200 dark:border-purple-700 rounded-xl p-5 shadow-sm hover:shadow-md transition block">
-            <div class="flex items-center justify-between mb-3">
-                <div class="p-2 rounded-lg bg-purple-50 dark:bg-purple-900/30">
-                    <svg class="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-purple-500">💳 En attente</span>
-            </div>
-            <h5 class="text-3xl font-bold text-gray-900 dark:text-white">{{ db_stats.pending_partner_ads }}</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ads Partenaires</p>
-        </a>
-
-        <!-- Nouveaux partenaires à vérifier -->
-        <a href="{% url 'admin:partners_partner_changelist' %}"
-           class="bg-white dark:bg-gray-800 border border-green-200 dark:border-green-700 rounded-xl p-5 shadow-sm hover:shadow-md transition block">
-            <div class="flex items-center justify-between mb-3">
-                <div class="p-2 rounded-lg bg-green-50 dark:bg-green-900/30">
-                    <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                </div>
-                <span class="text-xs font-semibold text-green-500">🆕 Nouveaux</span>
-            </div>
-            <h5 class="text-3xl font-bold text-gray-900 dark:text-white">{{ db_stats.new_partners }}</h5>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Partenaires à vérifier</p>
-        </a>
-
+    <!-- Événements -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Événements</p>
+        <span class="w-8 h-8 bg-violet-50 dark:bg-violet-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-violet-600 dark:text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ events_count }}</p>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Événements publiés</p>
     </div>
 
-{% endblock body %}
+    <!-- Publicités -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">Publicités</p>
+        <span class="w-8 h-8 bg-amber-50 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ ads_count }}</p>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">Annonces actives</p>
+    </div>
+
+  </div>
+
+{% else %}
+
+  <!-- DASHBOARD ADMIN -->
+  <div class="mb-6">
+    <h1 class="text-2xl font-medium text-gray-900 dark:text-white">{% trans "Tableau de bord" %}</h1>
+    <p class="text-gray-500 dark:text-gray-400 mt-1 text-sm">{% trans "Vue d'ensemble de la plateforme" %}</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+
+    <!-- Locations -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{% trans "Locations" %}</p>
+        <span class="w-8 h-8 bg-orange-50 dark:bg-orange-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-orange-500 dark:text-orange-400" fill="currentColor" viewBox="0 0 640 640">
+            <path d="M320 576C461.4 576 576 461.4 576 320C576 178.6 461.4 64 320 64C178.6 64 64 178.6 64 320C64 461.4 178.6 576 320 576zM370.7 389.1L226.4 444.6C207 452.1 187.9 433 195.4 413.6L250.9 269.3C254.2 260.8 260.8 254.2 269.3 250.9L413.6 195.4C433 187.9 452.1 207 444.6 226.4L389.1 370.7C385.9 379.2 379.2 385.8 370.7 389.1z"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ locations_count|default:"0" }}</p>
+      <p class="text-xs text-green-500 mt-1">+ {% trans "this month" %}</p>
+    </div>
+
+    <!-- Events -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{% trans "Events" %}</p>
+        <span class="w-8 h-8 bg-teal-50 dark:bg-teal-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-teal-500 dark:text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ events_count|default:"0" }}</p>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{% trans "upcoming" %}</p>
+    </div>
+
+    <!-- Hikings -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{% trans "Hikings" %}</p>
+        <span class="w-8 h-8 bg-violet-50 dark:bg-violet-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-violet-500 dark:text-violet-400" fill="currentColor" viewBox="0 -960 960 960">
+            <path d="m280-40 123-622q6-29 27-43.5t44-14.5q23 0 42.5 10t31.5 30l40 64q18 29 46.5 52.5T700-529v-71h60v560h-60v-406q-48-11-89-35t-71-59l-24 120 84 80v300h-80v-240l-84-80-72 320h-84Z"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ hikings_count|default:"0" }}</p>
+      <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">{% trans "trails" %}</p>
+    </div>
+
+    <!-- Ads -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
+      <div class="flex items-center justify-between mb-4">
+        <p class="text-xs font-medium uppercase tracking-wider text-gray-400 dark:text-gray-500">{% trans "Publicités" %}</p>
+        <span class="w-8 h-8 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-blue-500 dark:text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M20.337 3.664c.213.212.354.486.404.782.294 1.711.657 5.195-.906 6.76-1.77 1.768-8.485 5.517-10.611 6.683a.987.987 0 0 1-1.176-.173l-.882-.88-.877-.884a.988.988 0 0 1-.173-1.177c1.165-2.126 4.913-8.841 6.682-10.611 1.562-1.563 5.046-1.198 6.757-.904.296.05.57.191.782.404ZM5.407 7.576l4-.341-2.69 4.48-2.857-.334a.996.996 0 0 1-.565-1.694l2.112-2.111Zm11.357 7.02-.34 4-2.111 2.113a.996.996 0 0 1-1.69-.565l-.422-2.807 4.563-2.74Z" clip-rule="evenodd"/>
+          </svg>
+        </span>
+      </div>
+      <p class="text-xl font-semibold text-gray-900 dark:text-white">{{ ads_count|default:"0" }}</p>
+      <p class="text-xs text-green-500 mt-1">{% trans "active" %}</p>
+    </div>
+
+  </div>
+
+  <!-- Espace partenaires -->
+  <p class="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">{% trans "Espace partenaires" %}</p>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+    <a href="{% url 'guard:eventsList' %}" class="bg-white dark:bg-gray-800 rounded-xl border border-amber-200 dark:border-amber-800/50 p-5 hover:border-amber-400 transition group">
+      <div class="flex items-center justify-between mb-4">
+        <span class="w-8 h-8 bg-amber-50 dark:bg-amber-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+          </svg>
+        </span>
+        <span class="text-xs font-semibold text-amber-500">{% trans "À valider" %}</span>
+      </div>
+      <p class="text-gray-700 dark:text-gray-300 font-medium">{% trans "Events Partenaires" %}</p>
+    </a>
+
+    <a href="{% url 'guard:adsList' %}" class="bg-white dark:bg-gray-800 rounded-xl border border-violet-200 dark:border-violet-800/50 p-5 hover:border-violet-400 transition group">
+      <div class="flex items-center justify-between mb-4">
+        <span class="w-8 h-8 bg-violet-50 dark:bg-violet-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-violet-500" fill="currentColor" viewBox="0 0 24 24">
+            <path fill-rule="evenodd" d="M20.337 3.664c.213.212.354.486.404.782.294 1.711.657 5.195-.906 6.76-1.77 1.768-8.485 5.517-10.611 6.683a.987.987 0 0 1-1.176-.173l-.882-.88-.877-.884a.988.988 0 0 1-.173-1.177c1.165-2.126 4.913-8.841 6.682-10.611 1.562-1.563 5.046-1.198 6.757-.904.296.05.57.191.782.404Z" clip-rule="evenodd"/>
+          </svg>
+        </span>
+        <span class="text-xs font-semibold text-blue-500">{% trans "En attente" %}</span>
+      </div>
+      <p class="text-gray-700 dark:text-gray-300 font-medium">{% trans "Ads Partenaires" %}</p>
+    </a>
+
+    <a href="{% url 'guard:partnersList' %}" class="bg-white dark:bg-gray-800 rounded-xl border border-emerald-200 dark:border-emerald-800/50 p-5 hover:border-emerald-400 transition group">
+      <div class="flex items-center justify-between mb-4">
+        <span class="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg flex items-center justify-center">
+          <svg class="w-4 h-4 text-emerald-500" fill="currentColor" viewBox="0 -960 960 960">
+            <path d="M40-160v-112q0-34 17.5-62.5T104-378q62-31 126-46.5T360-440q66 0 130 15.5T616-378q29 15 46.5 43.5T680-272v112H40Zm720 0v-120q0-44-24.5-84.5T666-434q51 6 96 20.5t84 35.5q36 20 55 44.5t19 53.5v120H760ZM360-480q-66 0-113-47t-47-113q0-66 47-113t113-47q66 0 113 47t47 113q0 66-47 113t-113 47Zm400-160q0 66-47 113t-113 47q-11 0-28-2.5t-28-5.5q27-32 41.5-71t14.5-81q0-42-14.5-81T544-792q14-5 28-6.5t28-1.5q66 0 113 47t47 113Z"/>
+          </svg>
+        </span>
+        <span class="text-xs font-semibold text-emerald-500">{% trans "Nouveaux" %}</span>
+      </div>
+      <p class="text-gray-700 dark:text-gray-300 font-medium">{% trans "Partenaires à vérifier" %}</p>
+    </a>
+
+  </div>
+
+{% endif %}
+
+{% endblock %}
