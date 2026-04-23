@@ -34,4 +34,5 @@ firebase_service_account.json
 *-firebase-adminsdk-*.json
 
 mobile_operations.graphql
-fielmedinasousse-firebase-adminsdk-fbsvc-32939c9c5a.json
+fielmedinasousse-firebase-adminsdk-fbsvc-32939c9c5a.jsonvenv/
+staticfiles/
