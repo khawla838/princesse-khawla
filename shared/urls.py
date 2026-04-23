@@ -16,10 +16,11 @@ from .views import (
     PageDeleteView,
     translate_text,
 )
+from partners.views_email_change import request_email_change, confirm_email_change  # ← ici
 
 app_name = "shared"
 urlpatterns = [
-    # Auth en premier — pas de protection
+    # Auth
     path("auth/login/", CustomLoginView.as_view(), name="login"),
     path("auth/logout/", CustomLogoutView.as_view(), name="logout"),
     path("auth/register/", RegisterView.as_view(), name="register"),
@@ -31,8 +32,10 @@ urlpatterns = [
     path("auth/password-change/done/", CustomPasswordChangeDoneView.as_view(), name="password_change_done"),
     path("auth/settings/", SettingView.as_view(), name="settings"),
     path("api/translate/", translate_text, name="translate_text"),
+    path("partners/request-email-change/", request_email_change, name="request_email_change"),
+    path("partners/confirm-email-change/<str:token>/", confirm_email_change, name="confirm_email_change"),
 
-    # Pages (staff only) — à la fin
+    # Pages (staff only)
     path("pages/", PageListView.as_view(), name="home"),
     path("pages/", PageListView.as_view(), name="pageList"),
     path("pages/create/", PageCreateView.as_view(), name="page_create"),

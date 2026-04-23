@@ -34,7 +34,7 @@ urlpatterns = [
     path('account/',              views.account,             name='account'),
     path('account/password/',     views.change_password,     name='change_password'),
     path('account/email/',        views.change_email,        name='change_email'),
-    path('account/email/cancel/', views.cancel_email_change, name='cancel_email_change'),
+    path('verify-email/<str:token>/', views.verify_email_change, name='verify_email_change'),
     path('account/toggle/',       views.toggle_account,      name='toggle_account'),
 
     # Coupon (AJAX)

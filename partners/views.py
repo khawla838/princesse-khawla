@@ -4,7 +4,11 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
+from django.core.mail import send_mail
+from django.conf import settings
+from django.utils.translation import gettext_lazy as _
 import json
+import uuid
 
 from partners.models import Partner, PartnerEvent, PartnerEventMedia, PartnerAd, Coupon
 from partners.forms import PartnerEventForm, PartnerAdForm
@@ -164,11 +168,11 @@ def event_boost_success(request, event_id):
             event.boost_paid_at     = timezone.now()
             event.save(update_fields=['is_boosted', 'boosted_at', 'status', 'boost_payment_ref', 'boost_paid_at'])
             send_receipt(partner, 'boost', {
-                'label':     'Boost Evenement',       # ← sans accent
-                'Evenement': event.title,             # ← sans accent
-                'Periode':   f"{event.start_date} - {event.end_date}",  # ← sans accent
-                'Duree':     f"{event.nb_days} jour(s)",                 # ← sans accent
-                'Reference': payment_ref,             # ← sans accent
+                'label':     'Boost Evenement',
+                'Evenement': event.title,
+                'Periode':   f"{event.start_date} - {event.end_date}",
+                'Duree':     f"{event.nb_days} jour(s)",
+                'Reference': payment_ref,
                 'amount':    f"{event.boost_price:.3f}",
             }, payment_ref=payment_ref)
             messages.success(request, f"Événement '{event.title}' boosté avec succès !")
@@ -279,9 +283,9 @@ def ad_success(request, ad_id):
     ad          = get_object_or_404(PartnerAd, id=ad_id, partner=partner)
     payment_ref = request.GET.get('payment_ref') or request.session.pop('ad_payment_ref', '')
     send_receipt(partner, 'ad', {
-        'label':   'Publicite FielMedina',            # ← sans accent
-        'Periode': f"{ad.start_date} - {ad.end_date}", # ← sans accent
-        'Duree':   f"{ad.nb_days} jour(s)",            # ← sans accent
+        'label':   'Publicite FielMedina',
+        'Periode': f"{ad.start_date} - {ad.end_date}",
+        'Duree':   f"{ad.nb_days} jour(s)",
         'amount':  f"{ad.total_price:.3f}",
     }, payment_ref=payment_ref)
     messages.success(request, "Publicité activée avec succès !")
@@ -377,9 +381,9 @@ def subscription_success(request):
             price_info = calculate_subscription_price(period, payment_type)
             send_receipt(partner, 'subscription', {
                 'label':     f"Abonnement {PERIOD_LABELS.get(period, period)}",
-                'Periode':   PERIOD_LABELS.get(period, period),  # ← sans accent
+                'Periode':   PERIOD_LABELS.get(period, period),
                 'Type':      'Paiement total' if payment_type == 'total' else 'Mensuel',
-                'Reference': payment_ref,                        # ← sans accent
+                'Reference': payment_ref,
                 'amount':    f"{price_info['total']:.3f}",
             }, payment_ref=payment_ref)
             messages.success(request, "Abonnement activé avec succès !")
@@ -453,42 +457,67 @@ def change_email(request):
     if request.method == 'POST':
         new_email     = request.POST.get('new_email', '').strip().lower()
         confirm_email = request.POST.get('confirm_email', '').strip().lower()
-        if not new_email or new_email == request.user.email:
-            messages.error(request, "Email invalide ou identique.")
+
+        if not new_email or new_email == partner.email:
+            messages.error(request, "Email invalide ou identique à l'actuel.", extra_tags='email')
         elif new_email != confirm_email:
-            messages.error(request, "Les emails ne correspondent pas.")
+            messages.error(request, "Les emails ne correspondent pas.", extra_tags='email')
+        elif Partner.objects.filter(email=new_email).exists():
+            messages.error(request, "Cet email est déjà utilisé.", extra_tags='email')
         else:
-            partner.pending_email = new_email
-            partner.save(update_fields=['pending_email'])
-            messages.success(request, f"Demande envoyée pour '{new_email}'.")
+            from partners.email_utils import send_email_change_confirmation
+            send_email_change_confirmation(partner, new_email, request=request)
+            messages.success(
+                request,
+                f"Un lien de vérification a été envoyé à '{new_email}'.",
+                extra_tags='email'
+            )
+
     return redirect('partners:account')
 
 
-@partner_required
-def cancel_email_change(request):
-    if request.method == 'POST':
-        request.partner.pending_email = None
-        request.partner.save(update_fields=['pending_email'])
-        messages.success(request, "Demande annulée.")
-    return redirect('partners:account')
+# ✅ Vue corrigée : vérification complète + messages avec extra_tags + redirect
+def verify_email_change(request, token):
+    # Trouver le partenaire avec ce token
+    try:
+        partner = Partner.objects.get(email_change_token=token)
+    except Partner.DoesNotExist:
+        messages.error(request, "Lien invalide ou déjà utilisé.", extra_tags='email')
+        return redirect('partners:account')
 
+    # Vérifier que new_email est défini
+    new_email = (partner.new_email or partner.pending_email or '').strip().lower()
+    if not new_email:
+        messages.error(request, "Aucun nouvel email en attente.", extra_tags='email')
+        return redirect('partners:account')
 
-@partner_required
-def toggle_account(request):
-    partner = request.partner
-    if request.method == 'POST':
-        if partner.is_temporarily_disabled:
-            partner.is_temporarily_disabled = False
-            partner.reactivated_at          = timezone.now()
-            partner.disabled_reason         = None
-            partner.save(update_fields=['is_temporarily_disabled', 'reactivated_at', 'disabled_reason'])
-            messages.success(request, "Compte réactivé.")
-        else:
-            partner.is_temporarily_disabled = True
-            partner.disabled_at             = timezone.now()
-            partner.disabled_reason         = request.POST.get('reason', 'Désactivation volontaire')
-            partner.save(update_fields=['is_temporarily_disabled', 'disabled_at', 'disabled_reason'])
-            messages.success(request, "Compte désactivé temporairement.")
+    # Vérifier unicité
+    if Partner.objects.exclude(pk=partner.pk).filter(email=new_email).exists():
+        partner.email_change_token = ''
+        partner.new_email          = None
+        partner.pending_email      = ''
+        partner.save(update_fields=['email_change_token', 'new_email', 'pending_email'])
+        messages.error(request, "Cet email est déjà utilisé par un autre compte.", extra_tags='email')
+        return redirect('partners:account')
+
+    # ── Mise à jour ───────────────────────────────────────────────────────────
+    partner.email              = new_email
+    partner.email_change_token = ''
+    partner.new_email          = None
+    partner.pending_email      = ''
+    partner.save(update_fields=['email', 'email_change_token', 'new_email', 'pending_email'])
+
+    user = partner.user
+    if user:
+        user.email    = new_email
+        user.username = new_email
+        user.save(update_fields=['email', 'username'])
+
+    messages.success(
+        request,
+        f"Votre email a été mis à jour avec succès : {new_email}",
+        extra_tags='email'
+    )
     return redirect('partners:account')
 
 
@@ -511,3 +540,21 @@ def coupon_verify(request):
         'code':     coupon.code,
         'category': coupon.get_category_display(),
     })
+
+@partner_required
+def toggle_account(request):
+    partner = request.partner
+    if request.method == 'POST':
+        if partner.is_temporarily_disabled:
+            partner.is_temporarily_disabled = False
+            partner.reactivated_at          = timezone.now()
+            partner.disabled_reason         = None
+            partner.save(update_fields=['is_temporarily_disabled', 'reactivated_at', 'disabled_reason'])
+            messages.success(request, "Compte réactivé.")
+        else:
+            partner.is_temporarily_disabled = True
+            partner.disabled_at             = timezone.now()
+            partner.disabled_reason         = request.POST.get('reason', 'Désactivation volontaire')
+            partner.save(update_fields=['is_temporarily_disabled', 'disabled_at', 'disabled_reason'])
+            messages.success(request, "Compte désactivé temporairement.")
+    return redirect('partners:account')

@@ -7,10 +7,10 @@
 
       <div class="mb-8">
         <a href="{% url 'partners:ad_list' %}" class="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 flex items-center gap-1 mb-4">
-          ← {% trans "Retour aux publicités" %}
+          ← {% trans "Back to ads" %}
         </a>
-        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">💳 {% trans "Paiement" %}</h1>
-        <p class="text-gray-500 dark:text-gray-400 mt-1">{% trans "Finalisez votre publicité via Konnect" %}</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">💳 {% trans "Payment" %}</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">{% trans "Finalize your ad via Konnect" %}</p>
       </div>
 
       <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-100 dark:border-gray-700 shadow-sm p-8 space-y-6">
@@ -19,12 +19,12 @@
           <h3 class="font-bold text-purple-800 dark:text-purple-300 text-lg mb-3">{{ ad.title }}</h3>
           <div class="space-y-2 text-sm text-purple-700 dark:text-purple-400">
             <div class="flex justify-between">
-              <span>{% trans "Période" %}</span>
+              <span>{% trans "Period" %}</span>
               <span>{{ ad.start_date|date:"d M Y" }} → {{ ad.end_date|date:"d M Y" }}</span>
             </div>
             <div class="flex justify-between">
-              <span>{% trans "Durée" %}</span>
-              <span>{{ ad.nb_days }} jour(s)</span>
+              <span>{% trans "Duration" %}</span>
+              <span>{{ ad.nb_days }} day(s)</span>
             </div>
             <div class="flex justify-between border-t border-purple-200 dark:border-purple-700 pt-2 mt-2">
               <span class="font-bold">{% trans "Total" %}</span>
@@ -36,8 +36,8 @@
         <div class="flex items-center gap-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600 rounded-xl p-4">
           <div class="text-3xl">🔐</div>
           <div>
-            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">{% trans "Paiement sécurisé via Konnect" %}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{% trans "Carte bancaire, Wallet ou e-DINAR acceptés" %}</p>
+            <p class="text-sm font-semibold text-gray-800 dark:text-gray-200">{% trans "Secure payment via Konnect" %}</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{% trans "Credit card, Wallet or e-DINAR accepted" %}</p>
           </div>
         </div>
 
@@ -45,13 +45,13 @@
           {% csrf_token %}
           <button type="submit"
             class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-xl transition shadow-md text-lg">
-            {% trans "Payer" %} {{ ad.total_price|floatformat:"-3" }} TND →
+            {% trans "Pay" %} {{ ad.total_price|floatformat:"-3" }} TND →
           </button>
         </form>
 
         <p class="text-xs text-gray-400 dark:text-gray-500 text-center">
-          {% trans "Vous serez redirigé vers la plateforme de paiement Konnect." %}<br>
-          {% trans "Votre publicité sera activée automatiquement après confirmation." %}
+          {% trans "You will be redirected to the Konnect payment platform." %}<br>
+          {% trans "Your ad will be activated automatically after confirmation." %}
         </p>
 
       </div>

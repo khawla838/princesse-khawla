@@ -100,6 +100,8 @@ class Partner(models.Model):
     reset_token            = models.CharField(max_length=255, blank=True, null=True)
     reset_token_expires_at = models.DateTimeField(blank=True, null=True)
     pending_email          = models.EmailField(blank=True, null=True)
+    email_change_token     = models.CharField(max_length=64, blank=True, default='')
+    new_email              = models.EmailField(blank=True, null=True)
     konnect_wallet_id      = models.CharField(max_length=255, blank=True, null=True)
 
     payment_status = models.CharField(
@@ -474,7 +476,7 @@ class ReceiptHistory(models.Model):
     sent_to_email  = models.EmailField(blank=True)
     created_at     = models.DateTimeField(auto_now_add=True)
     pdf_file = models.FileField(upload_to='receipts/', blank=True, null=True)
-
+    
     class Meta:
         verbose_name        = 'Reçu'
         verbose_name_plural = 'Reçus'
